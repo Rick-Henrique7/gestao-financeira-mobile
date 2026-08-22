@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal, StyleSheet } from 'react-native';
 import { ChevronDown } from 'lucide-react-native';
 import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useReducedMotion, safeModalAnimation } from '../../lib/motion';
 
 interface SelectOption<T extends string> {
   value: T;
@@ -24,6 +25,7 @@ export function SelectField<T extends string>({
   invalid,
 }: SelectFieldProps<T>) {
   const [open, setOpen] = useState(false);
+  const reducedMotion = useReducedMotion();
   const current = options.find((o) => o.value === value);
 
   return (
@@ -41,7 +43,7 @@ export function SelectField<T extends string>({
       <Modal
         visible={open}
         transparent
-        animationType="fade"
+        animationType={reducedMotion ? 'none' : 'fade'}
         onRequestClose={() => setOpen(false)}
         statusBarTranslucent
       >

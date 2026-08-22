@@ -8,11 +8,19 @@ interface DateInputFieldProps {
   onChange: (v: string) => void;
   invalid?: boolean;
   placeholder?: string;
+  /** Label visivel (e tambem usado pelo screen reader via accessibilityLabel) */
+  label?: string;
 }
 
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-export function DateInputField({ value, onChange, invalid, placeholder = 'AAAA-MM-DD' }: DateInputFieldProps) {
+export function DateInputField({
+  value,
+  onChange,
+  invalid,
+  placeholder = 'AAAA-MM-DD',
+  label = 'Data',
+}: DateInputFieldProps) {
   const [touched, setTouched] = useState(false);
   const isValidFormat = !value || ISO_RE.test(value);
 
@@ -26,7 +34,12 @@ export function DateInputField({ value, onChange, invalid, placeholder = 'AAAA-M
   const showError = !isValidFormat && (touched || value.length > 0);
 
   return (
-    <View style={[s.wrap, (invalid || showError) && s.invalid]}>
+    <View
+      style={[s.wrap, (invalid || showError) && s.invalid]}
+      accessible
+      accessibilityLabel={label}
+      accessibilityHint="Formato AAAA-MM-DD"
+    >
       <View style={s.inputRow}>
         <View style={{ flex: 1 }}>
           <TextInput
@@ -37,6 +50,8 @@ export function DateInputField({ value, onChange, invalid, placeholder = 'AAAA-M
             keyboardType="number-pad"
             maxLength={10}
             placeholderTextColor={colors.muted}
+            accessibilityLabel={`${label} (formato AAAA-MM-DD)`}
+            accessibilityHint="Digite 8 digitos - a mascara adiciona os tracos automaticamente"
           />
         </View>
         <View style={s.icon}>
@@ -50,17 +65,13 @@ export function DateInputField({ value, onChange, invalid, placeholder = 'AAAA-M
 const s = StyleSheet.create({
   wrap: {
     backgroundColor: colors.surfaceHigh,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.button,
+    borderWidth: 1, borderColor: colors.border, borderRadius: radius.button,
   },
   invalid: { borderColor: colors.danger },
   inputRow: { flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.md, paddingRight: 12 },
   input: {
-    paddingVertical: 10,
-    color: colors.text,
-    fontSize: typography.size.md,
-    fontFamily: typography.fontFamily.mono,
+    paddingVertical: 10, color: colors.text,
+    fontSize: typography.size.md, fontFamily: typography.fontFamily.mono,
   },
   icon: { padding: 4 },
 });

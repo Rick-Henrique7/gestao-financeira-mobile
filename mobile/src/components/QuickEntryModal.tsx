@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, Modal, Pressable, StyleSheet } from 'react-native';
 import { X, TrendingDown, TrendingUp, PiggyBank, LucideIcon } from 'lucide-react-native';
 import { colors, radius, spacing, typography } from '../lib/theme';
+import { useReducedMotion, safeModalAnimation } from '../lib/motion';
 
 export type QuickEntryAction = 'EXPENSE' | 'INCOME' | 'GOAL_DEPOSIT';
 
@@ -46,11 +47,12 @@ const ACTIONS: Array<{
 ];
 
 export function QuickEntryModal({ visible, onClose, onSelect }: QuickEntryModalProps) {
+  const reducedMotion = useReducedMotion();
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType={safeModalAnimation(reducedMotion)}
       onRequestClose={onClose}
       statusBarTranslucent
     >

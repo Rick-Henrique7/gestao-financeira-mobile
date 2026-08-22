@@ -38,12 +38,14 @@ const RECENT_TX = [
 ];
 
 export default function DashboardScreen() {
-  const { bills, refresh: refreshBills } = useBillsStore();
-  const { refresh: refreshCashflow } = useCashflowStore();
-  const { refresh: refreshGoals, goals } = useGoalsStore();
+  const { bills, loading: billsLoading, refresh: refreshBills } = useBillsStore();
+  const { summary, loading: cashLoading, refresh: refreshCashflow } = useCashflowStore();
+  const { loading: goalsLoading, refresh: refreshGoals, goals } = useGoalsStore();
   const { settings, refresh: refreshSettings, toggleHideValues } = useSettingsStore();
 
   const hide = settings?.hide_values === 1;
+  // Loading geral: qualquer store ainda buscando dados
+  const loading = billsLoading || cashLoading || goalsLoading;
 
   useEffect(() => {
     refreshBills();
@@ -98,6 +100,13 @@ export default function DashboardScreen() {
       />
 
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
+        {loading && (
+          <View style={s.loadingBanner} accessibilityLiveRegion="polite">
+            <ActivityIndicator color={colors.accent} size="small" />
+            <Text style={s.loadingText}>Carregando dados...</Text>
+          </View>
+        )}
+
         <View style={s.section}>
           <View style={s.sectionHeader}>
             <Text style={s.sectionTitle}>Favourite Contacts</Text>
@@ -226,5 +235,13 @@ const s = StyleSheet.create({
     backgroundColor: colors.surfaceDark1, borderRadius: 12, marginTop: 8,
   },
   viewAllText: { color: colors.textMuted, fontSize: typography.size.sm, flex: 1 },
+  loadingBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    paddingHorizontal: spacing.lg, paddingVertical: spacing.md,
+    marginHorizontal: spacing.lg, marginBottom: spacing.sm,
+    backgroundColor: colors.surface, borderRadius: radius.button,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  loadingText: { color: colors.textMuted, fontSize: typography.size.sm },
   footer: { color: colors.textMuted, fontSize: typography.size.xs, textAlign: 'center', letterSpacing: 1, marginTop: spacing.md },
 });

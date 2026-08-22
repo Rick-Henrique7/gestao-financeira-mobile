@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, Pressable 
 import { useRouter } from 'expo-router';
 import { Menu, X, CreditCard, Target, Calculator, Settings } from 'lucide-react-native';
 import { colors, radius, spacing, typography } from '../lib/theme';
+import { useReducedMotion, safeModalAnimation } from '../lib/motion';
 
 const items = [
   { label: 'Empréstimos',     sub: 'Valores a receber',    Icon: CreditCard, route: '/loans' },
@@ -14,6 +15,7 @@ const items = [
 export function DrawerMenu() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const reducedMotion = useReducedMotion();
 
   return (
     <>
@@ -30,7 +32,7 @@ export function DrawerMenu() {
       <Modal
         visible={open}
         transparent
-        animationType="fade"
+        animationType={reducedMotion ? 'none' : 'fade'}
         onRequestClose={() => setOpen(false)}
         statusBarTranslucent
       >

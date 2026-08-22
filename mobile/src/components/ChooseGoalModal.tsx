@@ -5,6 +5,7 @@ import {
 import { X, PiggyBank, Target as TargetIcon, Plane, Car, Home, GraduationCap, Heart, Gift, Smartphone, ShoppingBag, Briefcase, Wallet } from 'lucide-react-native';
 import { colors, radius, spacing, typography } from '../lib/theme';
 import { useGoalsStore } from '../stores/goalsStore';
+import { useReducedMotion, safeModalAnimation } from '../lib/motion';
 import { fmt } from '../lib/format';
 import type { FinancialGoal } from '../types';
 
@@ -32,6 +33,7 @@ interface ChooseGoalModalProps {
 export function ChooseGoalModal({ visible, onClose, onSelect }: ChooseGoalModalProps) {
   const { goals, refresh } = useGoalsStore();
   const [loading, setLoading] = useState(true);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (visible) {
@@ -44,7 +46,7 @@ export function ChooseGoalModal({ visible, onClose, onSelect }: ChooseGoalModalP
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType={safeModalAnimation(reducedMotion)}
       onRequestClose={onClose}
       statusBarTranslucent
     >

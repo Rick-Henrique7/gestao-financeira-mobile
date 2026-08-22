@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View, KeyboardAvoidingView, Platform } from 'react-native';
 import { X } from 'lucide-react-native';
 import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useReducedMotion, safeModalAnimation } from '../../lib/motion';
 
 interface FormModalProps {
   visible: boolean;
@@ -12,11 +13,12 @@ interface FormModalProps {
 }
 
 export function FormModal({ visible, title, onClose, children, error }: FormModalProps) {
+  const reducedMotion = useReducedMotion();
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType={safeModalAnimation(reducedMotion)}
       onRequestClose={onClose}
       statusBarTranslucent
     >

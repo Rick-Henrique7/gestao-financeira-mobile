@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Sistema Gerenciador Financeiro",
+    "slug": "sgf-mobile",
+    "version": "0.3.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
+    "scheme": "sgf",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A0D0A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.brasinha.sgf"
+    },
+    "android": {
+      "package": "com.brasinha.sgf",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0D0A"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-image-picker",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

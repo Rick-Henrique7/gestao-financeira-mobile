@@ -21,7 +21,7 @@ export default function BillsScreen() {
   const totalPaid     = paid.reduce((acc, b) => acc + b.amount, 0);
 
   return (
-    <SafeAreaView style={s.root} edges={['bottom']}>
+    <SafeAreaView style={s.root} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.scroll}>
         <View style={s.display}>
           <Text style={s.label}>A pagar</Text>

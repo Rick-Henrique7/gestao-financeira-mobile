@@ -47,14 +47,13 @@ export default function RootLayout() {
           headerTintColor: colors.text,
           headerTitleStyle: { fontWeight: '600' },
           contentStyle: { backgroundColor: colors.base },
-          headerLeft: () => <DrawerMenu />,
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="loans"      options={{ title: 'Empréstimos' }} />
-        <Stack.Screen name="goals"      options={{ title: 'Metas & Cofrinhos' }} />
-        <Stack.Screen name="simulacoes" options={{ title: 'Simulações' }} />
-        <Stack.Screen name="settings"   options={{ title: 'Configurações' }} />
+        <Stack.Screen name="loans"      options={{ title: 'Empréstimos',         headerLeft: () => <DrawerMenu /> }} />
+        <Stack.Screen name="goals"      options={{ title: 'Metas & Cofrinhos',   headerLeft: () => <DrawerMenu /> }} />
+        <Stack.Screen name="simulacoes" options={{ title: 'Simulações',          headerLeft: () => <DrawerMenu /> }} />
+        <Stack.Screen name="settings"   options={{ title: 'Configurações',       headerLeft: () => <DrawerMenu /> }} />
       </Stack>
     </SafeAreaProvider>
   );

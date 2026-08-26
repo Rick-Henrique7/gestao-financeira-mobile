@@ -18,7 +18,7 @@ export default function OrcamentoScreen() {
     }, {});
 
   return (
-    <SafeAreaView style={s.root} edges={['bottom']}>
+    <SafeAreaView style={s.root} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.scroll}>
         <View style={s.display}>
           <Text style={s.label}>Receitas</Text>

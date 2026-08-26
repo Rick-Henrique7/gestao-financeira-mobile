@@ -97,7 +97,7 @@ export function PremiumHeroCard({
             accessibilityRole="button"
             accessibilityLabel="Recompensas"
           >
-            <Trophy size={18} color={colors.textOnNeon} />
+            <Trophy size={18} color={colors.text} />
           </Pressable>
           <Pressable
             onPress={onAlerts}
@@ -106,7 +106,7 @@ export function PremiumHeroCard({
             accessibilityRole="button"
             accessibilityLabel={`Alertas${alertCount ? ` (${alertCount})` : ''}`}
           >
-            <Bell size={16} color={colors.textOnNeon} />
+            <Bell size={16} color={colors.text} />
             {alertCount > 0 && <View style={s.alertDot} />}
           </Pressable>
         </View>

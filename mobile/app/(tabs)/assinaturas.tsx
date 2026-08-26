@@ -14,7 +14,7 @@ export default function AssinaturasScreen() {
   const totalAnual = totalMensal * 12;
 
   return (
-    <SafeAreaView style={s.root} edges={['bottom']}>
+    <SafeAreaView style={s.root} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.scroll}>
         <View style={[s.display, { backgroundColor: colors.accent, borderColor: colors.accent }]}>
           <Text style={[s.label, { color: colors.textOnNeon }]}>Cofre de Assinaturas</Text>

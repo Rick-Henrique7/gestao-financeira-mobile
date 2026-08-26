@@ -49,6 +49,7 @@ export function BillForm({ visible, onClose }: { visible: boolean; onClose: () =
     if (isRecurrent && !frequency) return setError('Escolha a frequencia');
     setSubmitting(true);
     try {
+      console.log('[BillForm] onSubmit -> add()');
       await add({
         title: title.trim(),
         amount: a,
@@ -58,9 +59,11 @@ export function BillForm({ visible, onClose }: { visible: boolean; onClose: () =
         category: category.trim() || undefined,
         notes: notes.trim() || undefined,
       });
+      console.log('[BillForm] add() OK, fechando modal');
       reset();
       onClose();
     } catch (e) {
+      console.error('[BillForm] add() FALHOU:', e);
       setError((e as Error).message);
     } finally {
       setSubmitting(false);

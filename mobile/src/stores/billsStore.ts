@@ -26,47 +26,38 @@ export const useBillsStore = create<BillsState>((set) => ({
       const bills = await listBills();
       set({ bills, loading: false });
     } catch (e) {
+      console.error('[billsStore] refresh failed:', e);
       set({ error: (e as Error).message, loading: false });
     }
   },
 
   add: async (b) => {
-    try {
-      await createBill(b);
-      const bills = await listBills();
-      set({ bills });
-    } catch (e) {
-      set({ error: (e as Error).message });
-    }
+    // NAO swallow error - re-throw pro BillForm.onSubmit pegar
+    console.log('[billsStore] add() chamado com:', JSON.stringify(b));
+    await createBill(b);
+    console.log('[billsStore] add() createBill OK, listando...');
+    const bills = await listBills();
+    console.log('[billsStore] add() listBills retornou', bills.length, 'bills');
+    set({ bills, error: null });
   },
 
   togglePaid: async (id) => {
-    try {
-      await markBillPaid(id);
-      const bills = await listBills();
-      set({ bills });
-    } catch (e) {
-      set({ error: (e as Error).message });
-    }
+    console.log('[billsStore] togglePaid() id =', id);
+    await markBillPaid(id);
+    const bills = await listBills();
+    console.log('[billsStore] togglePaid() bills:', bills.length);
+    set({ bills, error: null });
   },
 
   update: async (id, patch) => {
-    try {
-      await updateBill(id, patch);
-      const bills = await listBills();
-      set({ bills });
-    } catch (e) {
-      set({ error: (e as Error).message });
-    }
+    await updateBill(id, patch);
+    const bills = await listBills();
+    set({ bills, error: null });
   },
 
   remove: async (id) => {
-    try {
-      await deleteBill(id);
-      const bills = await listBills();
-      set({ bills });
-    } catch (e) {
-      set({ error: (e as Error).message });
-    }
+    await deleteBill(id);
+    const bills = await listBills();
+    set({ bills, error: null });
   },
 }));

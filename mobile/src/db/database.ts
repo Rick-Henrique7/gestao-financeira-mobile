@@ -5,16 +5,67 @@ import { migration003 } from './migrations/003_goal_deposits';
 import { migration004 } from './migrations/004_goals_enhance';
 
 // ─── DB SINGLETON (SQLite local, offline-first) ─────────────────────────────
-let dbInstance: SQLite.SQLiteDatabase | null = null;
-
 const DB_NAME = 'sgf.db';
+let dbInstance: SQLite.SQLiteDatabase | null = null;
+let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
+
+function isInvalidDbError(e: unknown): boolean {
+  const msg = (e as Error)?.message ?? String(e);
+  return (
+    msg.includes('NullPointerException') ||
+    msg.includes('database is closed') ||
+    msg.includes('database is not open') ||
+    msg.includes('attempt to re-open an already-closed object') ||
+    msg.includes('database connection') ||
+    msg.includes('cannot perform operation on a closed')
+  );
+}
 
 export async function getDB(): Promise<SQLite.SQLiteDatabase> {
   if (dbInstance) return dbInstance;
-  const db = await SQLite.openDatabaseAsync(DB_NAME);
-  await runMigrations(db);
-  dbInstance = db;
-  return db;
+  // Mutex: chamadas concorrentes compartilham a mesma promise de init
+  if (!dbPromise) {
+    dbPromise = (async () => {
+      try {
+        const db = await SQLite.openDatabaseAsync(DB_NAME);
+        await runMigrations(db);
+        dbInstance = db;
+        return db;
+      } catch (e) {
+        dbPromise = null;
+        throw e;
+      } finally {
+        // Permite futuras chamadas depois do init completar
+        if (dbInstance) dbPromise = null;
+      }
+    })();
+  }
+  return dbPromise;
+}
+
+/**
+ * Executa uma operacao no DB com retry automatico se a connection estiver stale.
+ * O expo-sqlite no Android pode invalidar a connection quando o app vai pra
+ * background; ao voltar, a ref antiga joga NPE. Este helper detecta isso,
+ * fecha a ref stale, re-inicializa a DB, e tenta de novo (uma vez).
+ */
+export async function withDB<T>(fn: (db: SQLite.SQLiteDatabase) => Promise<T>): Promise<T> {
+  try {
+    const db = await getDB();
+    return await fn(db);
+  } catch (e) {
+    if (isInvalidDbError(e)) {
+      console.warn('[db] connection stale, re-opening');
+      try {
+        await dbInstance?.closeAsync();
+      } catch { /* ignore */ }
+      dbInstance = null;
+      dbPromise = null;
+      const db = await getDB();
+      return await fn(db);
+    }
+    throw e;
+  }
 }
 
 export function generateId(): string {
@@ -69,9 +120,10 @@ async function runMigrations(db: SQLite.SQLiteDatabase) {
 
 // Util para resetar (debug)
 export async function resetDB() {
-  if (dbInstance) {
-    await dbInstance.closeAsync();
-    dbInstance = null;
-  }
+  try {
+    await dbInstance?.closeAsync();
+  } catch { /* ignore */ }
+  dbInstance = null;
+  dbPromise = null;
   await SQLite.deleteDatabaseAsync(DB_NAME);
 }

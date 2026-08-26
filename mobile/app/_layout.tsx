@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import { useIRPFStore } from '../src/stores/irpfStore';
 import { useCashflowStore } from '../src/stores/cashflowStore';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { AppThemeProvider, useTheme } from '../src/lib/AppThemeProvider';
+import { Theme } from '../src/lib/theme';
 
 function ThemedStatusBar() {
   const { scheme } = useTheme();
@@ -19,15 +20,15 @@ function ThemedStatusBar() {
 
 function ThemedNavigator() {
   const { theme } = useTheme();
+  // Memoizar screenOptions - senao o Stack re-inicializa a cada render do theme
+  const screenOptions = useMemo(() => ({
+    headerStyle: { backgroundColor: theme.colors.base },
+    headerTintColor: theme.colors.text,
+    headerTitleStyle: { fontWeight: '600' as const },
+    contentStyle: { backgroundColor: theme.colors.base },
+  }), [theme]);
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: { backgroundColor: theme.colors.base },
-        headerTintColor: theme.colors.text,
-        headerTitleStyle: { fontWeight: '600' },
-        contentStyle: { backgroundColor: theme.colors.base },
-      }}
-    >
+    <Stack screenOptions={screenOptions}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="loans"      options={{ title: 'Empréstimos',       headerLeft: () => <DrawerMenu /> }} />
       <Stack.Screen name="goals"      options={{ title: 'Metas & Cofrinhos', headerLeft: () => <DrawerMenu /> }} />

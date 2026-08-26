@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Check, AlertCircle } from 'lucide-react-native';
 import { useIRPFStore } from '../../src/stores/irpfStore';
 import { fmt } from '../../src/lib/format';
 import { colors, radius, spacing, typography } from '../../src/lib/theme';
@@ -77,9 +78,11 @@ export default function IRPFTabScreen() {
             return (
               <View key={r.id} style={s.row}>
                 <View style={[s.statusIcon, { backgroundColor: isAtt ? colors.accent : 'rgba(251, 191, 36, 0.15)' }]}>
-                  <Text style={{ color: isAtt ? colors.textOnNeon : '#FBBF24', fontWeight: typography.weight.bold }}>
-                    {isAtt ? '✓' : '!'}
-                  </Text>
+                  {isAtt ? (
+                    <Check size={18} color={colors.textOnNeon} strokeWidth={3} />
+                  ) : (
+                    <AlertCircle size={18} color="#FBBF24" strokeWidth={3} />
+                  )}
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={s.rowTitle}>{r.title}</Text>
@@ -106,7 +109,7 @@ export default function IRPFTabScreen() {
 
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.base },
-  scroll: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 100, gap: spacing.md },
+  scroll: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl, paddingBottom: 100, gap: spacing.md },
   display: {
     backgroundColor: colors.surface, borderRadius: radius.display,
     padding: spacing.lg, borderWidth: 1, borderColor: colors.border,

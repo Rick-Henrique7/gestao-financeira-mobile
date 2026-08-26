@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal, StyleSheet } from 'react-native';
-import { ChevronDown } from 'lucide-react-native';
+import { ChevronDown, Check } from 'lucide-react-native';
 import { colors, radius, spacing, typography } from '../../lib/theme';
 import { useReducedMotion, safeModalAnimation } from '../../lib/motion';
 
@@ -65,7 +65,7 @@ export function SelectField<T extends string>({
                     <Text style={[s.itemLabel, selected && s.itemLabelSelected]}>
                       {opt.label}
                     </Text>
-                    {selected ? <Text style={s.check}>✓</Text> : null}
+                    {selected ? <Check size={18} color={colors.textOnNeon} /> : null}
                   </Pressable>
                 );
               })}
@@ -107,5 +107,4 @@ const s = StyleSheet.create({
   itemSelected: { backgroundColor: 'rgba(204, 240, 80, 0.12)' },
   itemLabel: { color: colors.text, fontSize: typography.size.md },
   itemLabelSelected: { color: colors.textOnNeon, fontWeight: typography.weight.semibold },
-  check: { color: colors.textOnNeon, fontSize: typography.size.lg, fontWeight: typography.weight.bold },
 });

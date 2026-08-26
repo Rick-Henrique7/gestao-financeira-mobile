@@ -61,7 +61,7 @@ export default function AssinaturasScreen() {
 
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.base },
-  scroll: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 100, gap: spacing.md },
+  scroll: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl, paddingBottom: 100, gap: spacing.md },
   display: {
     backgroundColor: colors.surface, borderRadius: radius.display,
     padding: spacing.lg, borderWidth: 1, borderColor: colors.border,

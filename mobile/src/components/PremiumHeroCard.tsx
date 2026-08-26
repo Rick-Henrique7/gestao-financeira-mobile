@@ -5,7 +5,7 @@ import {
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import {
   Eye, EyeOff, TrendingUp, ArrowUpRight, ArrowDownLeft,
-  CreditCard, Wallet, LucideIcon,
+  CreditCard, Wallet, Trophy, Bell, LucideIcon,
 } from 'lucide-react-native';
 import { colors, radius, spacing, typography } from '../lib/theme';
 
@@ -97,7 +97,7 @@ export function PremiumHeroCard({
             accessibilityRole="button"
             accessibilityLabel="Recompensas"
           >
-            <Text style={s.trophyEmoji}>🏆</Text>
+            <Trophy size={18} color={colors.textOnNeon} />
           </Pressable>
           <Pressable
             onPress={onAlerts}
@@ -106,7 +106,7 @@ export function PremiumHeroCard({
             accessibilityRole="button"
             accessibilityLabel={`Alertas${alertCount ? ` (${alertCount})` : ''}`}
           >
-            <Text style={s.bellEmoji}>🔔</Text>
+            <Bell size={16} color={colors.textOnNeon} />
             {alertCount > 0 && <View style={s.alertDot} />}
           </Pressable>
         </View>
@@ -185,8 +185,6 @@ const s = StyleSheet.create({
     backgroundColor: colors.bgCanvas,
     alignItems: 'center', justifyContent: 'center',
   },
-  trophyEmoji: { fontSize: 18 },
-  bellEmoji: { fontSize: 16 },
   alertDot: {
     position: 'absolute', top: 6, right: 6,
     width: 8, height: 8, borderRadius: 4,

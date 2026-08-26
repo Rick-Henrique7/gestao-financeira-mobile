@@ -10,7 +10,33 @@ import { useSubsStore } from '../src/stores/subscriptionsStore';
 import { useIRPFStore } from '../src/stores/irpfStore';
 import { useCashflowStore } from '../src/stores/cashflowStore';
 import { useSettingsStore } from '../src/stores/settingsStore';
-import { colors } from '../src/lib/theme';
+import { AppThemeProvider, useTheme } from '../src/lib/AppThemeProvider';
+
+function ThemedStatusBar() {
+  const { scheme } = useTheme();
+  return <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />;
+}
+
+function ThemedNavigator() {
+  const { theme } = useTheme();
+  return (
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.base },
+        headerTintColor: theme.colors.text,
+        headerTitleStyle: { fontWeight: '600' },
+        contentStyle: { backgroundColor: theme.colors.base },
+      }}
+    >
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="loans"      options={{ title: 'Empréstimos',       headerLeft: () => <DrawerMenu /> }} />
+      <Stack.Screen name="goals"      options={{ title: 'Metas & Cofrinhos', headerLeft: () => <DrawerMenu /> }} />
+      <Stack.Screen name="simulacoes" options={{ title: 'Simulações',        headerLeft: () => <DrawerMenu /> }} />
+      <Stack.Screen name="settings"   options={{ title: 'Configurações',     headerLeft: () => <DrawerMenu /> }} />
+      <Stack.Screen name="export"     options={{ title: 'Exportar dados',    headerLeft: () => <DrawerMenu /> }} />
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   const refreshBills = useBillsStore((s) => s.refresh);
@@ -39,22 +65,11 @@ export default function RootLayout() {
   ]);
 
   return (
-    <SafeAreaProvider>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: colors.base },
-          headerTintColor: colors.text,
-          headerTitleStyle: { fontWeight: '600' },
-          contentStyle: { backgroundColor: colors.base },
-        }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="loans"      options={{ title: 'Empréstimos',         headerLeft: () => <DrawerMenu /> }} />
-        <Stack.Screen name="goals"      options={{ title: 'Metas & Cofrinhos',   headerLeft: () => <DrawerMenu /> }} />
-        <Stack.Screen name="simulacoes" options={{ title: 'Simulações',          headerLeft: () => <DrawerMenu /> }} />
-        <Stack.Screen name="settings"   options={{ title: 'Configurações',       headerLeft: () => <DrawerMenu /> }} />
-      </Stack>
-    </SafeAreaProvider>
+    <AppThemeProvider>
+      <SafeAreaProvider>
+        <ThemedStatusBar />
+        <ThemedNavigator />
+      </SafeAreaProvider>
+    </AppThemeProvider>
   );
 }

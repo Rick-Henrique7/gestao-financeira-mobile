@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calculator, TrendingUp, Wallet } from 'lucide-react-native';
 import { fmt } from '../src/lib/format';
 import { colors, radius, spacing, typography } from '../src/lib/theme';
+import { ScreenTitle } from '../src/components/ScreenTitle';
 
 export default function SimulacoesScreen() {
   const [jc, setJc] = useState({ capital: '10000', taxa: '1', periodo: '12' });
@@ -42,6 +43,7 @@ export default function SimulacoesScreen() {
   return (
     <SafeAreaView style={s.root} edges={['bottom']}>
       <ScrollView contentContainerStyle={s.scroll}>
+        <ScreenTitle title="Simulações" subtitle="Calcule juros compostos e investimentos" />
         <View style={s.display}>
           <View style={s.headerRow}>
             <View style={[s.iconBox, { backgroundColor: colors.accent }]}>

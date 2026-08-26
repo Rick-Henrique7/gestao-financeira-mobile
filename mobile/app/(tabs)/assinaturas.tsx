@@ -1,28 +1,61 @@
 import { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useStyles } from '../../src/lib/AppThemeProvider';
 import { useSubsStore } from '../../src/stores/subscriptionsStore';
 import { fmt } from '../../src/lib/format';
-import { colors, radius, spacing, typography } from '../../src/lib/theme';
 import { FAB } from '../../src/components/form/FAB';
 import { SubscriptionForm } from '../../src/components/forms/SubscriptionForm';
+import { ScreenTitle } from '../../src/components/ScreenTitle';
 
 export default function AssinaturasScreen() {
+  const s = useStyles((t) => ({
+    root: { flex: 1, backgroundColor: t.colors.base },
+    scroll: { paddingHorizontal: t.spacing.lg, paddingBottom: 100, gap: t.spacing.md },
+    display: {
+      backgroundColor: t.colors.surface, borderRadius: t.radius.display,
+      padding: t.spacing.lg, borderWidth: 1, borderColor: t.colors.border,
+    },
+    displayOnNeon: { backgroundColor: t.colors.accent, borderColor: t.colors.accent },
+    label: { color: t.colors.textMuted, fontSize: t.typography.size.xs, textTransform: 'uppercase' as const, letterSpacing: 1.5, fontWeight: t.typography.weight.semibold },
+    labelOnNeon: { color: t.colors.textOnNeon },
+    bigValue: { fontSize: 36, fontWeight: t.typography.weight.bold, fontFamily: t.typography.fontFamily.mono, marginTop: t.spacing.xs },
+    bigValueOnNeon: { color: t.colors.textOnNeon },
+    unit: { fontSize: t.typography.size.lg, color: t.colors.textMuted, fontWeight: t.typography.weight.regular },
+    unitOnNeon: { color: t.colors.textOnNeon, opacity: 0.7 },
+    sub: { color: t.colors.textMuted, fontSize: t.typography.size.sm, marginTop: t.spacing.xs },
+    subOnNeon: { color: t.colors.textOnNeon, opacity: 0.75 },
+    title: { color: t.colors.text, fontSize: t.typography.size.lg, fontWeight: t.typography.weight.semibold, marginBottom: t.spacing.md },
+    empty: { color: t.colors.textMuted, fontSize: t.typography.size.md, textAlign: 'center' as const, paddingVertical: t.spacing.lg },
+    grid: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: t.spacing.sm },
+    card: {
+      width: '48%' as const, flexGrow: 1, backgroundColor: t.colors.surfaceHigh,
+      borderRadius: t.radius.display, padding: t.spacing.md, borderWidth: 1, borderColor: t.colors.border,
+    },
+    avatar: { width: 40, height: 40, borderRadius: t.radius.button, alignItems: 'center' as const, justifyContent: 'center' as const, marginBottom: t.spacing.sm },
+    avatarText: { color: t.colors.text, fontWeight: t.typography.weight.bold, fontSize: t.typography.size.md },
+    serviceName: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.semibold },
+    category: { color: t.colors.textMuted, fontSize: t.typography.size.xs, marginTop: 2 },
+    price: { color: t.colors.accent, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold, fontFamily: t.typography.fontFamily.mono, marginTop: t.spacing.sm },
+    yearly: { color: t.colors.textMuted, fontSize: t.typography.size.xs, marginTop: 2, fontFamily: t.typography.fontFamily.mono },
+  }));
+
   const { subs } = useSubsStore();
   const [formOpen, setFormOpen] = useState(false);
-  const totalMensal = subs.filter((s) => s.status === 'ACTIVE').reduce((acc, s) => acc + s.monthly_cost, 0);
+  const totalMensal = subs.filter((sub) => sub.status === 'ACTIVE').reduce((acc, sub) => acc + sub.monthly_cost, 0);
   const totalAnual = totalMensal * 12;
 
   return (
     <SafeAreaView style={s.root} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.scroll}>
-        <View style={[s.display, { backgroundColor: colors.accent, borderColor: colors.accent }]}>
-          <Text style={[s.label, { color: colors.textOnNeon }]}>Cofre de Assinaturas</Text>
-          <Text style={[s.bigValue, { color: colors.textOnNeon }]}>
+        <ScreenTitle title="Assinaturas" subtitle="Cofre de servicos recorrentes" />
+        <View style={[s.display, s.displayOnNeon]}>
+          <Text style={[s.label, s.labelOnNeon]}>Cofre de Assinaturas</Text>
+          <Text style={[s.bigValue, s.bigValueOnNeon]}>
             {fmt(totalAnual)}
-            <Text style={[s.unit, { color: colors.textOnNeon, opacity: 0.7 }]}>/ano</Text>
+            <Text style={[s.unit, s.unitOnNeon]}>/ano</Text>
           </Text>
-          <Text style={[s.sub, { color: colors.textOnNeon, opacity: 0.75 }]}>
+          <Text style={[s.sub, s.subOnNeon]}>
             {fmt(totalMensal)} por mes · {subs.length} assinaturas ativas
           </Text>
         </View>
@@ -58,29 +91,3 @@ export default function AssinaturasScreen() {
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.base },
-  scroll: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl, paddingBottom: 100, gap: spacing.md },
-  display: {
-    backgroundColor: colors.surface, borderRadius: radius.display,
-    padding: spacing.lg, borderWidth: 1, borderColor: colors.border,
-  },
-  label: { color: colors.muted, fontSize: typography.size.xs, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: typography.weight.semibold },
-  bigValue: { fontSize: 36, fontWeight: typography.weight.bold, fontFamily: typography.fontFamily.mono, marginTop: spacing.xs },
-  unit: { fontSize: typography.size.lg, color: colors.muted, fontWeight: typography.weight.regular },
-  sub: { color: colors.muted, fontSize: typography.size.sm, marginTop: spacing.xs },
-  title: { color: colors.text, fontSize: typography.size.lg, fontWeight: typography.weight.semibold, marginBottom: spacing.md },
-  empty: { color: colors.muted, fontSize: typography.size.md, textAlign: 'center', paddingVertical: spacing.lg },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  card: {
-    width: '48%', flexGrow: 1, backgroundColor: colors.surfaceHigh,
-    borderRadius: radius.display, padding: spacing.md, borderWidth: 1, borderColor: colors.border,
-  },
-  avatar: { width: 40, height: 40, borderRadius: radius.button, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.sm },
-  avatarText: { color: colors.text, fontWeight: typography.weight.bold, fontSize: typography.size.md },
-  serviceName: { color: colors.text, fontSize: typography.size.md, fontWeight: typography.weight.semibold },
-  category: { color: colors.muted, fontSize: typography.size.xs, marginTop: 2 },
-  price: { color: colors.accent, fontSize: typography.size.md, fontWeight: typography.weight.bold, fontFamily: typography.fontFamily.mono, marginTop: spacing.sm },
-  yearly: { color: colors.muted, fontSize: typography.size.xs, marginTop: 2, fontFamily: typography.fontFamily.mono },
-});

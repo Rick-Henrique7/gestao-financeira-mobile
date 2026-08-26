@@ -2,6 +2,7 @@ import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { User, Bell, Shield, Download, LogOut, ChevronRight } from 'lucide-react-native';
 import { colors, radius, spacing, typography } from '../src/lib/theme';
+import { ScreenTitle } from '../src/components/ScreenTitle';
 
 const items = [
   { label: 'Conta',          sub: 'Rafael Souza · rafael@email.com', Icon: User },
@@ -15,6 +16,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={s.root} edges={['bottom']}>
       <ScrollView contentContainerStyle={s.scroll}>
+        <ScreenTitle title="Configurações" subtitle="Conta, segurança e backup" />
         {items.map(({ label, sub, Icon, danger }) => (
           <Pressable
             key={label}

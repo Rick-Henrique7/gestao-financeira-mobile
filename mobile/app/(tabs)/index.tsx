@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator,
+  View, Text, ScrollView, Pressable, ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowUpRight, ArrowDownLeft, Plus, ChevronRight } from 'lucide-react-native';
-import { colors, radius, spacing, typography } from '../../src/lib/theme';
+import { useTheme, useStyles } from '../../src/lib/AppThemeProvider';
 import { useBillsStore } from '../../src/stores/billsStore';
 import { useCashflowStore } from '../../src/stores/cashflowStore';
 import { useGoalsStore } from '../../src/stores/goalsStore';
@@ -38,14 +38,62 @@ const RECENT_TX = [
 ];
 
 export default function DashboardScreen() {
+  const { colors } = useTheme();
+
+  const s = useStyles((t) => ({
+    root: { flex: 1, backgroundColor: t.colors.bgCanvas },
+    scroll: { paddingTop: 20, paddingBottom: 120, gap: t.spacing.md },
+    section: { paddingHorizontal: 20, paddingVertical: 16, gap: 12 },
+    sectionHeader: { flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'space-between' as const },
+    sectionTitle: { color: t.colors.text, fontSize: t.typography.size.xl, fontWeight: t.typography.weight.bold },
+    sectionSubtitle: { color: t.colors.textMuted, fontSize: t.typography.size.sm, marginTop: 2 },
+    viewAll: { color: t.colors.textMuted, fontSize: t.typography.size.sm, fontWeight: '500' as const },
+    contactsRow: { gap: 14, paddingRight: 20 },
+    contactItem: { alignItems: 'center' as const, width: 60, gap: 4 },
+    contactAdd: {
+      width: 56, height: 56, borderRadius: 28,
+      borderWidth: 1.5, borderStyle: 'dashed' as const, borderColor: t.colors.accent + '55',
+      backgroundColor: t.colors.surfaceDark1,
+      alignItems: 'center' as const, justifyContent: 'center' as const,
+    },
+    contactAvatar: { width: 56, height: 56, borderRadius: 28, alignItems: 'center' as const, justifyContent: 'center' as const },
+    contactInitials: { color: '#FFFFFF', fontWeight: t.typography.weight.bold, fontSize: 16 },
+    contactName: { color: t.colors.text, fontSize: 11, fontWeight: t.typography.weight.semibold, marginTop: 2 },
+    contactHandle: { color: t.colors.textMuted, fontSize: 9 },
+    txRow: {
+      flexDirection: 'row' as const, alignItems: 'center' as const, gap: 12,
+      paddingVertical: 12,
+      borderBottomWidth: 1, borderBottomColor: t.colors.border,
+    },
+    txIconBox: { width: 40, height: 40, borderRadius: 20, alignItems: 'center' as const, justifyContent: 'center' as const },
+    txTitle: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.semibold },
+    txSubtitle: { color: t.colors.textMuted, fontSize: t.typography.size.xs, marginTop: 2 },
+    txAmount: { fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold, fontFamily: t.typography.fontFamily.mono },
+    txTime: { color: t.colors.textMuted, fontSize: 10, marginTop: 2 },
+    viewAllRow: {
+      flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'space-between' as const,
+      paddingVertical: 12, paddingHorizontal: 12,
+      backgroundColor: t.colors.surfaceDark1, borderRadius: 12, marginTop: 8,
+    },
+    viewAllText: { color: t.colors.textMuted, fontSize: t.typography.size.sm, flex: 1 },
+    loadingBanner: {
+      flexDirection: 'row' as const, alignItems: 'center' as const, gap: t.spacing.sm,
+      paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md,
+      marginHorizontal: t.spacing.lg, marginBottom: t.spacing.sm,
+      backgroundColor: t.colors.surface, borderRadius: t.radius.button,
+      borderWidth: 1, borderColor: t.colors.border,
+    },
+    loadingText: { color: t.colors.textMuted, fontSize: t.typography.size.sm },
+    footer: { color: t.colors.textMuted, fontSize: t.typography.size.xs, textAlign: 'center' as const, letterSpacing: 1, marginTop: t.spacing.md },
+  }));
+
   const { bills, loading: billsLoading, refresh: refreshBills } = useBillsStore();
-  const { summary, loading: cashLoading, refresh: refreshCashflow } = useCashflowStore();
+  const { refresh: refreshCashflow } = useCashflowStore();
   const { loading: goalsLoading, refresh: refreshGoals, goals } = useGoalsStore();
   const { settings, refresh: refreshSettings, toggleHideValues } = useSettingsStore();
 
   const hide = settings?.hide_values === 1;
-  // Loading geral: qualquer store ainda buscando dados
-  const loading = billsLoading || cashLoading || goalsLoading;
+  const loading = billsLoading || goalsLoading;
 
   useEffect(() => {
     refreshBills();
@@ -198,50 +246,3 @@ export default function DashboardScreen() {
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bgCanvas },
-  scroll: { paddingTop: 20, paddingBottom: 120, gap: spacing.md },
-  section: { paddingHorizontal: 20, paddingVertical: 16, gap: 12 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  sectionTitle: { color: colors.text, fontSize: typography.size.xl, fontWeight: typography.weight.bold },
-  sectionSubtitle: { color: colors.textMuted, fontSize: typography.size.sm, marginTop: 2 },
-  viewAll: { color: colors.textMuted, fontSize: typography.size.sm, fontWeight: '500' },
-  contactsRow: { gap: 14, paddingRight: 20 },
-  contactItem: { alignItems: 'center', width: 60, gap: 4 },
-  contactAdd: {
-    width: 56, height: 56, borderRadius: 28,
-    borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.accent + '55',
-    backgroundColor: colors.surfaceDark1,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  contactAvatar: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
-  contactInitials: { color: '#FFFFFF', fontWeight: '700', fontSize: 16 },
-  contactName: { color: colors.text, fontSize: 11, fontWeight: '600', marginTop: 2 },
-  contactHandle: { color: colors.textMuted, fontSize: 9 },
-  txRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.04)',
-  },
-  txIconBox: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  txTitle: { color: colors.text, fontSize: typography.size.md, fontWeight: '600' },
-  txSubtitle: { color: colors.textMuted, fontSize: typography.size.xs, marginTop: 2 },
-  txAmount: { fontSize: typography.size.md, fontWeight: '700', fontFamily: 'monospace' },
-  txTime: { color: colors.textMuted, fontSize: 10, marginTop: 2 },
-  viewAllRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingVertical: 12, paddingHorizontal: 12,
-    backgroundColor: colors.surfaceDark1, borderRadius: 12, marginTop: 8,
-  },
-  viewAllText: { color: colors.textMuted, fontSize: typography.size.sm, flex: 1 },
-  loadingBanner: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-    paddingHorizontal: spacing.lg, paddingVertical: spacing.md,
-    marginHorizontal: spacing.lg, marginBottom: spacing.sm,
-    backgroundColor: colors.surface, borderRadius: radius.button,
-    borderWidth: 1, borderColor: colors.border,
-  },
-  loadingText: { color: colors.textMuted, fontSize: typography.size.sm },
-  footer: { color: colors.textMuted, fontSize: typography.size.xs, textAlign: 'center', letterSpacing: 1, marginTop: spacing.md },
-});

@@ -1,7 +1,7 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
+import { TouchableOpacity, ViewStyle } from 'react-native';
 import { Plus } from 'lucide-react-native';
-import { colors } from '../../lib/theme';
+import { useTheme, useStyles } from '../../lib/AppThemeProvider';
 
 interface FABProps {
   onPress: () => void;
@@ -10,6 +10,27 @@ interface FABProps {
 }
 
 export function FAB({ onPress, style, accessibilityLabel = 'Adicionar' }: FABProps) {
+  const { colors } = useTheme();
+
+  const s = useStyles((t) => ({
+    fab: {
+      position: 'absolute' as const,
+      right: 20,
+      bottom: 84,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: t.colors.accent,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      shadowColor: t.colors.accent,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+  }));
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -23,22 +44,3 @@ export function FAB({ onPress, style, accessibilityLabel = 'Adicionar' }: FABPro
     </TouchableOpacity>
   );
 }
-
-const s = StyleSheet.create({
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 84,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-});

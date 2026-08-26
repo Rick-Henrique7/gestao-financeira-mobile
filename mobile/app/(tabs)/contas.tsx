@@ -1,14 +1,50 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Check } from 'lucide-react-native';
-import { colors, radius, spacing, typography } from '../../src/lib/theme';
+import { useTheme, useStyles } from '../../src/lib/AppThemeProvider';
 import { useBillsStore } from '../../src/stores/billsStore';
 import { fmt } from '../../src/lib/format';
 import { FAB } from '../../src/components/form/FAB';
 import { BillForm } from '../../src/components/forms/BillForm';
+import { ScreenTitle } from '../../src/components/ScreenTitle';
 
 export default function BillsScreen() {
+  const { colors, typography } = useTheme();
+
+  const s = useStyles((t) => ({
+    root: { flex: 1, backgroundColor: t.colors.base },
+    scroll: { paddingHorizontal: t.spacing.lg, paddingBottom: 100, gap: t.spacing.md },
+    display: {
+      backgroundColor: t.colors.surface, borderRadius: t.radius.display,
+      padding: t.spacing.lg, borderWidth: 1, borderColor: t.colors.border,
+    },
+    label: { color: t.colors.textMuted, fontSize: t.typography.size.xs, textTransform: 'uppercase' as const, letterSpacing: 1.5, fontWeight: t.typography.weight.semibold },
+    bigValue: { fontSize: 36, fontWeight: t.typography.weight.bold, fontFamily: t.typography.fontFamily.mono, marginTop: t.spacing.xs },
+    sub: { color: t.colors.textMuted, fontSize: t.typography.size.sm, marginTop: t.spacing.xs },
+    title: { color: t.colors.text, fontSize: t.typography.size.lg, fontWeight: t.typography.weight.semibold, marginBottom: t.spacing.md },
+    empty: { color: t.colors.textMuted, fontSize: t.typography.size.md, textAlign: 'center' as const, paddingVertical: t.spacing.lg },
+    row: {
+      flexDirection: 'row' as const, alignItems: 'center' as const, gap: t.spacing.md,
+      paddingVertical: t.spacing.md,
+      borderBottomWidth: 1, borderBottomColor: t.colors.border,
+    },
+    rowDone: { opacity: 0.5 },
+    checkbox: {
+      width: 22, height: 22, borderRadius: 6,
+      borderWidth: 2, borderColor: t.colors.borderStrong,
+    },
+    checkboxDone: { backgroundColor: t.colors.accent, borderColor: t.colors.accent, alignItems: 'center' as const, justifyContent: 'center' as const },
+    strikethrough: { textDecorationLine: 'line-through' as const },
+    billTitle: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.medium },
+    billMeta: { color: t.colors.textMuted, fontSize: t.typography.size.sm, marginTop: 2 },
+    billAmount: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.semibold, fontFamily: t.typography.fontFamily.mono },
+    summaryRow: { flexDirection: 'row' as const, justifyContent: 'space-between' as const, paddingTop: t.spacing.md },
+    summaryLabel: { color: t.colors.textMuted, fontSize: t.typography.size.sm },
+    summaryValue: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold, fontFamily: t.typography.fontFamily.mono },
+    loading: { marginVertical: 16 },
+  }));
+
   const { bills, loading, refresh, togglePaid, remove } = useBillsStore();
   const [formOpen, setFormOpen] = useState(false);
 
@@ -23,6 +59,7 @@ export default function BillsScreen() {
   return (
     <SafeAreaView style={s.root} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.scroll}>
+        <ScreenTitle title="Contas" subtitle="Suas contas a pagar e historico" />
         <View style={s.display}>
           <Text style={s.label}>A pagar</Text>
           <Text style={[s.bigValue, { color: colors.danger }]}>{fmt(totalPending)}</Text>
@@ -31,7 +68,7 @@ export default function BillsScreen() {
 
         <View style={s.display}>
           <Text style={s.title}>Contas pendentes</Text>
-          {loading && <ActivityIndicator color={colors.accent} style={{ marginVertical: 16 }} />}
+          {loading && <ActivityIndicator color={colors.accent} style={s.loading} />}
           {!loading && pending.length === 0 && (
             <Text style={s.empty}>Nenhuma conta pendente</Text>
           )}
@@ -63,7 +100,7 @@ export default function BillsScreen() {
             {[...paid, ...overdue].map((b) => (
               <View key={b.id} style={[s.row, b.status === 'PAID' && s.rowDone]}>
                 <View style={[s.checkbox, b.status === 'PAID' && s.checkboxDone]}>
-                  {b.status === 'PAID' && <Check size={12} color={colors.base} />}
+                  {b.status === 'PAID' && <Check size={12} color={colors.textOnNeon} />}
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[s.billTitle, b.status === 'PAID' && s.strikethrough]}>
@@ -91,35 +128,3 @@ export default function BillsScreen() {
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.base },
-  scroll: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl, paddingBottom: 100, gap: spacing.md },
-  display: {
-    backgroundColor: colors.surface, borderRadius: radius.display,
-    padding: spacing.lg, borderWidth: 1, borderColor: colors.border,
-  },
-  label: { color: colors.muted, fontSize: typography.size.xs, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: typography.weight.semibold },
-  bigValue: { fontSize: 36, fontWeight: typography.weight.bold, fontFamily: typography.fontFamily.mono, marginTop: spacing.xs },
-  sub: { color: colors.muted, fontSize: typography.size.sm, marginTop: spacing.xs },
-  title: { color: colors.text, fontSize: typography.size.lg, fontWeight: typography.weight.semibold, marginBottom: spacing.md },
-  empty: { color: colors.muted, fontSize: typography.size.md, textAlign: 'center', paddingVertical: spacing.lg },
-  row: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.md,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1, borderBottomColor: colors.border,
-  },
-  rowDone: { opacity: 0.5 },
-  checkbox: {
-    width: 22, height: 22, borderRadius: 6,
-    borderWidth: 2, borderColor: colors.borderStrong,
-  },
-  checkboxDone: { backgroundColor: colors.accent, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
-  strikethrough: { textDecorationLine: 'line-through' },
-  billTitle: { color: colors.text, fontSize: typography.size.md, fontWeight: typography.weight.medium },
-  billMeta: { color: colors.muted, fontSize: typography.size.sm, marginTop: 2 },
-  billAmount: { color: colors.text, fontSize: typography.size.md, fontWeight: typography.weight.semibold, fontFamily: typography.fontFamily.mono },
-  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: spacing.md },
-  summaryLabel: { color: colors.muted, fontSize: typography.size.sm },
-  summaryValue: { color: colors.text, fontSize: typography.size.md, fontWeight: typography.weight.bold, fontFamily: typography.fontFamily.mono },
-});

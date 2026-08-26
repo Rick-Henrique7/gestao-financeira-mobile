@@ -6,6 +6,7 @@ import { useLoansStore } from '../src/stores/loansStore';
 import { fmt } from '../src/lib/format';
 import { FAB } from '../src/components/form/FAB';
 import { LoanForm } from '../src/components/forms/LoanForm';
+import { ScreenTitle } from '../src/components/ScreenTitle';
 
 export default function LoansScreen() {
   const { loans, loading, refresh, pay, remove } = useLoansStore();
@@ -20,6 +21,7 @@ export default function LoansScreen() {
   return (
     <SafeAreaView style={s.root} edges={['bottom']}>
       <ScrollView contentContainerStyle={s.scroll}>
+        <ScreenTitle title="Empréstimos" subtitle="Valores a receber de amigos ou familia" />
         <View style={s.display}>
           <Text style={s.label}>A receber</Text>
           <Text style={[s.bigValue, { color: colors.success }]}>{fmt(totalOpen)}</Text>

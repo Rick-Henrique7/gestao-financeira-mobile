@@ -1,14 +1,56 @@
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Check, AlertCircle } from 'lucide-react-native';
+import { useTheme, useStyles } from '../../src/lib/AppThemeProvider';
 import { useIRPFStore } from '../../src/stores/irpfStore';
 import { fmt } from '../../src/lib/format';
-import { colors, radius, spacing, typography } from '../../src/lib/theme';
 import { FAB } from '../../src/components/form/FAB';
 import { IRPFForm } from '../../src/components/forms/IRPFForm';
+import { ScreenTitle } from '../../src/components/ScreenTitle';
 
 export default function IRPFTabScreen() {
+  const { colors } = useTheme();
+
+  const s = useStyles((t) => ({
+    root: { flex: 1, backgroundColor: t.colors.base },
+    scroll: { paddingHorizontal: t.spacing.lg, paddingBottom: 100, gap: t.spacing.md },
+    display: {
+      backgroundColor: t.colors.surface, borderRadius: t.radius.display,
+      padding: t.spacing.lg, borderWidth: 1, borderColor: t.colors.border,
+    },
+    title: { color: t.colors.text, fontSize: t.typography.size.xl, fontWeight: t.typography.weight.semibold },
+    sub: { color: t.colors.textMuted, fontSize: t.typography.size.sm, marginTop: 4 },
+    progressBar: { height: 6, backgroundColor: t.colors.surfaceHigh, borderRadius: 3, marginTop: t.spacing.md, overflow: 'hidden' as const },
+    progressFill: { height: '100%' as const, backgroundColor: t.colors.accent, borderRadius: 3 },
+    metaText: { color: t.colors.textMuted, fontSize: t.typography.size.xs, marginTop: t.spacing.sm },
+    tabs: { gap: t.spacing.sm, paddingVertical: t.spacing.xs },
+    tab: {
+      color: t.colors.textMuted, fontSize: t.typography.size.md, paddingHorizontal: t.spacing.md, paddingVertical: t.spacing.sm,
+      borderRadius: t.radius.pill, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.border,
+      overflow: 'hidden' as const,
+    },
+    tabActive: { color: t.colors.base, backgroundColor: t.colors.accent, borderColor: t.colors.accent, fontWeight: t.typography.weight.semibold },
+    row: {
+      flexDirection: 'row' as const, alignItems: 'center' as const, gap: t.spacing.md,
+      backgroundColor: t.colors.surface, padding: t.spacing.md,
+      borderRadius: t.radius.display, borderWidth: 1, borderColor: t.colors.border,
+    },
+    statusIcon: { width: 32, height: 32, borderRadius: t.radius.button, alignItems: 'center' as const, justifyContent: 'center' as const },
+    statusIconDone: { backgroundColor: t.colors.accent },
+    statusIconPending: { backgroundColor: 'rgba(251, 191, 36, 0.15)' },
+    rowTitle: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.medium },
+    rowMeta: { color: t.colors.textMuted, fontSize: t.typography.size.sm, marginTop: 2, fontFamily: t.typography.fontFamily.mono },
+    pill: { paddingHorizontal: t.spacing.sm, paddingVertical: 4, borderRadius: t.radius.pill },
+    pillDone: { backgroundColor: t.colors.accent },
+    pillPending: { backgroundColor: 'rgba(251, 191, 36, 0.15)' },
+    pillText: { fontSize: t.typography.size.xs, fontWeight: t.typography.weight.semibold },
+    pillTextDone: { color: t.colors.textOnNeon },
+    pillTextPending: { color: '#FBBF24' },
+    empty: { color: t.colors.textMuted, fontSize: t.typography.size.md, textAlign: 'center' as const, paddingVertical: t.spacing.lg },
+    loading: { marginTop: t.spacing.xl },
+  }));
+
   const { records, categories, loading, refresh, refreshCategories } = useIRPFStore();
   const [activeTab, setActiveTab] = useState<string>('');
   const [formOpen, setFormOpen] = useState(false);
@@ -32,10 +74,10 @@ export default function IRPFTabScreen() {
   const progressPct = total > 0 ? (done / total) * 100 : 0;
 
   return (
-    <SafeAreaView style={s.root} edges={['top']}>
+    <SafeAreaView style={s.root} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.scroll}>
+        <ScreenTitle title="IRPF 2026" subtitle="Comprovantes e categorias" />
         <View style={s.display}>
-          <Text style={s.title}>IRPF 2026</Text>
           <Text style={s.sub}>{done} de {total} comprovantes anexados</Text>
           <View style={s.progressBar}>
             <View style={[s.progressFill, { width: `${progressPct}%` }]} />
@@ -65,7 +107,7 @@ export default function IRPFTabScreen() {
         )}
 
         {loading ? (
-          <ActivityIndicator color={colors.accent} style={{ marginTop: spacing.xl }} />
+          <ActivityIndicator color={colors.accent} style={s.loading} />
         ) : activeRecords.length === 0 ? (
           <View style={s.display}>
             <Text style={s.empty}>
@@ -77,7 +119,7 @@ export default function IRPFTabScreen() {
             const isAtt = r.status === 'ATTACHED';
             return (
               <View key={r.id} style={s.row}>
-                <View style={[s.statusIcon, { backgroundColor: isAtt ? colors.accent : 'rgba(251, 191, 36, 0.15)' }]}>
+                <View style={[s.statusIcon, isAtt ? s.statusIconDone : s.statusIconPending]}>
                   {isAtt ? (
                     <Check size={18} color={colors.textOnNeon} strokeWidth={3} />
                   ) : (
@@ -90,8 +132,8 @@ export default function IRPFTabScreen() {
                     {fmt(r.gross_value)}{r.ticker ? ` · ${r.ticker}` : ''}
                   </Text>
                 </View>
-                <View style={[s.pill, { backgroundColor: isAtt ? colors.accent : 'rgba(251, 191, 36, 0.15)' }]}>
-                  <Text style={[s.pillText, { color: isAtt ? colors.textOnNeon : '#FBBF24' }]}>
+                <View style={[s.pill, isAtt ? s.pillDone : s.pillPending]}>
+                  <Text style={[s.pillText, isAtt ? s.pillTextDone : s.pillTextPending]}>
                     {isAtt ? 'Anexado' : 'Pendente'}
                   </Text>
                 </View>
@@ -106,35 +148,3 @@ export default function IRPFTabScreen() {
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.base },
-  scroll: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl, paddingBottom: 100, gap: spacing.md },
-  display: {
-    backgroundColor: colors.surface, borderRadius: radius.display,
-    padding: spacing.lg, borderWidth: 1, borderColor: colors.border,
-  },
-  title: { color: colors.text, fontSize: typography.size.xl, fontWeight: typography.weight.semibold },
-  sub: { color: colors.muted, fontSize: typography.size.sm, marginTop: 4 },
-  progressBar: { height: 6, backgroundColor: colors.surfaceHigh, borderRadius: 3, marginTop: spacing.md, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: colors.accent, borderRadius: 3 },
-  metaText: { color: colors.muted, fontSize: typography.size.xs, marginTop: spacing.sm },
-  tabs: { gap: spacing.sm, paddingVertical: spacing.xs },
-  tab: {
-    color: colors.muted, fontSize: typography.size.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
-    borderRadius: radius.pill, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
-    overflow: 'hidden',
-  },
-  tabActive: { color: colors.base, backgroundColor: colors.accent, borderColor: colors.accent, fontWeight: typography.weight.semibold },
-  row: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.md,
-    backgroundColor: colors.surface, padding: spacing.md,
-    borderRadius: radius.display, borderWidth: 1, borderColor: colors.border,
-  },
-  statusIcon: { width: 32, height: 32, borderRadius: radius.button, alignItems: 'center', justifyContent: 'center' },
-  rowTitle: { color: colors.text, fontSize: typography.size.md, fontWeight: typography.weight.medium },
-  rowMeta: { color: colors.muted, fontSize: typography.size.sm, marginTop: 2, fontFamily: typography.fontFamily.mono },
-  pill: { paddingHorizontal: spacing.sm, paddingVertical: 4, borderRadius: radius.pill },
-  pillText: { fontSize: typography.size.xs, fontWeight: typography.weight.semibold },
-  empty: { color: colors.muted, fontSize: typography.size.md, textAlign: 'center', paddingVertical: spacing.lg },
-});

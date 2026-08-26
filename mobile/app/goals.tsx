@@ -16,6 +16,7 @@ import { GoalForm } from '../src/components/forms/GoalForm';
 import { GoalDepositForm } from '../src/components/forms/GoalDepositForm';
 import { GoalSimulatorForm } from '../src/components/forms/GoalSimulatorForm';
 import type { FinancialGoal, GoalDepositType } from '../src/types';
+import { ScreenTitle } from '../src/components/ScreenTitle';
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
   default:      PiggyBank,
@@ -58,6 +59,7 @@ export default function GoalsScreen() {
   return (
     <SafeAreaView style={s.root} edges={['bottom']}>
       <ScrollView contentContainerStyle={s.scroll}>
+        <ScreenTitle title="Metas & Cofrinhos" subtitle="Seus objetivos financeiros" />
         <View style={s.header}>
           <Text style={s.h1}>Cofrinhos</Text>
           <Text style={s.sub}>

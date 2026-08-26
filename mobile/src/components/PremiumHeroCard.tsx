@@ -7,7 +7,11 @@ import {
   Eye, EyeOff, TrendingUp, ArrowUpRight, ArrowDownLeft,
   CreditCard, Wallet, Trophy, Bell, LucideIcon,
 } from 'lucide-react-native';
-import { colors, radius, spacing, typography } from '../lib/theme';
+// PremiumHeroCard usa darkColors fixo: o design do hero (neon green + botoes
+// escuros + texto preto sobre neon) e parte da identidade visual e nao muda
+// com o tema do sistema. Para temas light, considere uma variante deste
+// componente (ex: PremiumHeroCardLight) que use bgCanvas light e accent dark.
+import { darkColors, radius, spacing, typography } from '../lib/theme';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const HERO_WIDTH = SCREEN_WIDTH;
@@ -97,7 +101,7 @@ export function PremiumHeroCard({
             accessibilityRole="button"
             accessibilityLabel="Recompensas"
           >
-            <Trophy size={18} color={colors.text} />
+            <Trophy size={18} color={darkColors.text} />
           </Pressable>
           <Pressable
             onPress={onAlerts}
@@ -106,7 +110,7 @@ export function PremiumHeroCard({
             accessibilityRole="button"
             accessibilityLabel={`Alertas${alertCount ? ` (${alertCount})` : ''}`}
           >
-            <Bell size={16} color={colors.text} />
+            <Bell size={16} color={darkColors.text} />
             {alertCount > 0 && <View style={s.alertDot} />}
           </Pressable>
         </View>
@@ -126,13 +130,13 @@ export function PremiumHeroCard({
             accessibilityLabel={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
             accessibilityState={{ selected: hideValues }}
           >
-            <Eye size={18} color={colors.textOnNeon} opacity={0.7} />
+            <Eye size={18} color={darkColors.textOnNeon} opacity={0.7} />
           </Pressable>
         </View>
 
         <View style={s.pill}>
           <View style={s.pillIconBox}>
-            <TrendingUp size={12} color={colors.accent} />
+            <TrendingUp size={12} color={darkColors.accent} />
           </View>
           <Text style={s.pillText}>
             {variationText ?? `${trendingUp ? '+' : ''}${variationPct.toFixed(0)}% Last week`}
@@ -149,7 +153,7 @@ export function PremiumHeroCard({
               accessibilityRole="button"
               accessibilityLabel={label}
             >
-              <Icon size={22} color={colors.text} strokeWidth={2} />
+              <Icon size={22} color={darkColors.text} strokeWidth={2} />
             </Pressable>
             <Text style={s.actionLabel}>{label}</Text>
           </View>
@@ -172,36 +176,36 @@ const s = StyleSheet.create({
   userBox: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
   avatar: {
     width: 40, height: 40, borderRadius: 20,
-    backgroundColor: colors.textOnNeon,
+    backgroundColor: darkColors.textOnNeon,
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1.5, borderColor: colors.bgCanvas,
+    borderWidth: 1.5, borderColor: darkColors.bgCanvas,
   },
-  avatarText: { color: colors.accent, fontWeight: '800', fontSize: 13 },
-  userName: { color: colors.textOnNeon, fontSize: 14, fontWeight: '700' },
+  avatarText: { color: darkColors.accent, fontWeight: '800', fontSize: 13 },
+  userName: { color: darkColors.textOnNeon, fontSize: 14, fontWeight: '700' },
   userHandle: { color: 'rgba(0,0,0,0.6)', fontSize: 11, fontWeight: '500', marginTop: 1 },
   topActions: { flexDirection: 'row', gap: 8 },
   topIconBtn: {
     width: 38, height: 38, borderRadius: 19,
-    backgroundColor: colors.bgCanvas,
+    backgroundColor: darkColors.bgCanvas,
     alignItems: 'center', justifyContent: 'center',
   },
   alertDot: {
     position: 'absolute', top: 6, right: 6,
     width: 8, height: 8, borderRadius: 4,
-    backgroundColor: colors.danger,
-    borderWidth: 1.5, borderColor: colors.bgCanvas,
+    backgroundColor: darkColors.danger,
+    borderWidth: 1.5, borderColor: darkColors.bgCanvas,
   },
   balanceBox: { paddingHorizontal: 20, paddingTop: 18, gap: 6 },
   balanceLabel: { color: 'rgba(0,0,0,0.6)', fontSize: typography.size.sm, fontWeight: '600', textTransform: 'capitalize' },
   balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   balanceValue: {
-    color: colors.textOnNeon, fontSize: 36,
+    color: darkColors.textOnNeon, fontSize: 36,
     fontWeight: '800', letterSpacing: -1,
   },
   eyeBtn: { padding: 4, marginLeft: 4 },
   pill: {
     flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start',
-    backgroundColor: colors.bgCanvas,
+    backgroundColor: darkColors.bgCanvas,
     paddingHorizontal: 10, paddingVertical: 4,
     borderRadius: radius.pill, gap: 6, marginTop: 4,
   },
@@ -210,7 +214,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(204, 240, 80, 0.15)',
     alignItems: 'center', justifyContent: 'center',
   },
-  pillText: { color: colors.accent, fontSize: 11, fontWeight: '600' },
+  pillText: { color: darkColors.accent, fontSize: 11, fontWeight: '600' },
   actionRow: {
     flexDirection: 'row', justifyContent: 'space-between',
     paddingHorizontal: 20, marginTop: 18,
@@ -218,13 +222,13 @@ const s = StyleSheet.create({
   actionItem: { alignItems: 'center', gap: 6 },
   actionBtn: {
     width: 64, height: 64, borderRadius: 22,
-    backgroundColor: colors.surfaceDark1,
+    backgroundColor: darkColors.surfaceDark1,
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.04)',
   },
-  actionBtnPressed: { backgroundColor: colors.surfaceDark2 },
+  actionBtnPressed: { backgroundColor: darkColors.surfaceDark2 },
   actionLabel: {
-    color: colors.textOnNeon, fontSize: 11, fontWeight: '600', textAlign: 'center',
+    color: darkColors.textOnNeon, fontSize: 11, fontWeight: '600', textAlign: 'center',
     letterSpacing: 0.2,
   },
 });

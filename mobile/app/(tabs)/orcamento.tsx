@@ -1,13 +1,43 @@
 import { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme, useStyles } from '../../src/lib/AppThemeProvider';
 import { useCashflowStore } from '../../src/stores/cashflowStore';
 import { fmt } from '../../src/lib/format';
-import { colors, radius, spacing, typography } from '../../src/lib/theme';
 import { FAB } from '../../src/components/form/FAB';
 import { CashflowForm } from '../../src/components/forms/CashflowForm';
+import { ScreenTitle } from '../../src/components/ScreenTitle';
 
 export default function OrcamentoScreen() {
+  const { colors } = useTheme();
+
+  const s = useStyles((t) => ({
+    root: { flex: 1, backgroundColor: t.colors.base },
+    scroll: { paddingHorizontal: t.spacing.lg, paddingBottom: 100, gap: t.spacing.md },
+    display: {
+      backgroundColor: t.colors.surface, borderRadius: t.radius.display,
+      padding: t.spacing.lg, borderWidth: 1, borderColor: t.colors.border,
+    },
+    label: { color: t.colors.textMuted, fontSize: t.typography.size.sm, textTransform: 'uppercase' as const, letterSpacing: 1 },
+    bigValue: {
+      fontSize: t.typography.size.xxl, fontWeight: t.typography.weight.bold,
+      fontFamily: t.typography.fontFamily.mono,
+    },
+    title: { color: t.colors.text, fontSize: t.typography.size.lg, fontWeight: t.typography.weight.semibold, marginBottom: t.spacing.md },
+    row: {
+      flexDirection: 'row' as const, justifyContent: 'space-between' as const,
+      paddingVertical: t.spacing.sm, borderBottomWidth: 1, borderBottomColor: t.colors.border,
+    },
+    cat: { color: t.colors.text, fontSize: t.typography.size.md },
+    catValue: {
+      color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.semibold,
+      fontFamily: t.typography.fontFamily.mono,
+    },
+    empty: { color: t.colors.textMuted, fontSize: t.typography.size.md, textAlign: 'center' as const, paddingVertical: t.spacing.lg },
+    divider: { height: 1, backgroundColor: t.colors.border },
+    spacer: { height: t.spacing.md },
+  }));
+
   const { transactions, summary } = useCashflowStore();
   const [formOpen, setFormOpen] = useState(false);
   const byCategory = transactions
@@ -20,15 +50,16 @@ export default function OrcamentoScreen() {
   return (
     <SafeAreaView style={s.root} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.scroll}>
+        <ScreenTitle title="Orçamento" subtitle="Receitas, despesas e saldo do mes" />
         <View style={s.display}>
           <Text style={s.label}>Receitas</Text>
           <Text style={[s.bigValue, { color: colors.success }]}>{fmt(summary.income)}</Text>
-          <View style={{ height: spacing.md }} />
+          <View style={s.spacer} />
           <Text style={s.label}>Despesas</Text>
           <Text style={[s.bigValue, { color: colors.danger }]}>{fmt(summary.expense)}</Text>
-          <View style={{ height: spacing.md }} />
+          <View style={s.spacer} />
           <View style={s.divider} />
-          <View style={{ height: spacing.md }} />
+          <View style={s.spacer} />
           <Text style={s.label}>Saldo</Text>
           <Text style={[s.bigValue, { color: colors.accent }]}>{fmt(summary.balance)}</Text>
         </View>
@@ -57,29 +88,3 @@ export default function OrcamentoScreen() {
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.base },
-  scroll: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl, paddingBottom: 100, gap: spacing.md },
-  display: {
-    backgroundColor: colors.surface, borderRadius: radius.display,
-    padding: spacing.lg, borderWidth: 1, borderColor: colors.border,
-  },
-  label: { color: colors.muted, fontSize: typography.size.sm, textTransform: 'uppercase', letterSpacing: 1 },
-  bigValue: {
-    fontSize: typography.size.xxl, fontWeight: typography.weight.bold,
-    fontFamily: typography.fontFamily.mono,
-  },
-  title: { color: colors.text, fontSize: typography.size.lg, fontWeight: typography.weight.semibold, marginBottom: spacing.md },
-  row: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border,
-  },
-  cat: { color: colors.text, fontSize: typography.size.md },
-  catValue: {
-    color: colors.text, fontSize: typography.size.md, fontWeight: typography.weight.semibold,
-    fontFamily: typography.fontFamily.mono,
-  },
-  empty: { color: colors.muted, fontSize: typography.size.md, textAlign: 'center', paddingVertical: spacing.lg },
-  divider: { height: 1, backgroundColor: colors.border },
-});

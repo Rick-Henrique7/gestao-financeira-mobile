@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -6,10 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
-  KeyboardAvoidingView,
-  Platform,
-  findNodeHandle,
-  UIManager,
+  Keyboard,
 } from 'react-native';
 import { X } from 'lucide-react-native';
 import { colors, radius, spacing, typography } from '../../lib/theme';
@@ -26,61 +23,32 @@ interface FormModalProps {
 export function FormModal({ visible, title, onClose, children, error }: FormModalProps) {
   const reducedMotion = useReducedMotion();
   const scrollRef = useRef<ScrollView | null>(null);
+  // Altura do teclado (px) — usada como marginBottom do sheet pra ele
+  // subir junto quando o teclado aparece. Isso substitui o
+  // KeyboardAvoidingView, que tem comportamento limitado na nova
+  // arquitetura (Fabric) do RN 0.83.
+  const [kbHeight, setKbHeight] = useState(0);
 
-  /**
-   * Handler para TextInput.onFocus dentro do modal.
-   * - Garante que o input fica visivel acima do teclado (scrollIntoView).
-   * - Funciona em iOS e Android sem precisar de KeyboardAvoidingView perfeito.
-   * - Adiciona tambem o keyboard opening como gatilho para re-scroll
-   *   (caso o input mude de posicao entre o focus e o teclado abrir).
-   */
-  const onInputFocus = (e: any) => {
-    const target = e?.target;
-    if (target == null) return;
-    const scrollNode = findNodeHandle(scrollRef.current);
-    if (scrollNode == null) return;
-    // 180ms = tipico tempo entre focus e keyboard abrindo no iOS
-    const run = () => {
-      try {
-        UIManager.measureLayout(
-          target,
-          scrollNode,
-          () => {},
-          (x: number, y: number) => {
-            // Pede pro ScrollView rolar ate o Y do input + offset de seguranca
-            // (deixa ~120px acima do teclado pro label nao cobrir o input)
-            scrollRef.current?.scrollTo({ y: Math.max(0, y - 120), animated: true });
-          }
-        );
-      } catch {
-        // best-effort
-      }
-    };
-    setTimeout(run, 180);
-    setTimeout(run, 400); // fallback caso 180ms ainda nao tenha teclado
-  };
-
-  // Listener global: sempre que o teclado abre, faz scroll do input focado.
-  // Isso cobre o caso do usuario tocar num input sem disparar onFocus
-  // (ex: input ja estava focado e o teclado abre por outro motivo).
+  // 1) Mede a altura do teclado sempre que ele aparece/some.
+  // 2) Rola o conteudo pro final quando o teclado sobe, garantindo
+  //    que o input focado (que costuma estar perto do rodape do form)
+  //    fica visivel acima do teclado.
   React.useEffect(() => {
     if (!visible) return;
-    let sub: any;
-    try {
-      const { Keyboard } = require('react-native');
-      sub = Keyboard.addListener('keyboardDidShow', () => {
-        // Acha o TextInput focado (RN guarda em State)
-        // e pede pro ScrollView re-rolar.
-        // Medida simplificada: scrolla para o final do conteudo, que garante
-        // que o input visivel mais baixo fica acima do teclado.
-        setTimeout(() => {
-          try {
-            scrollRef.current?.scrollToEnd({ animated: true });
-          } catch {}
-        }, 50);
-      });
-    } catch {}
-    return () => { try { sub?.remove?.(); } catch {} };
+    const showSub = Keyboard.addListener('keyboardDidShow', (e) => {
+      setKbHeight(e.endCoordinates?.height ?? 0);
+      // Da tempo do sheet recalcular layout antes do scroll
+      setTimeout(() => {
+        try { scrollRef.current?.scrollToEnd({ animated: true }); } catch {}
+      }, 80);
+    });
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setKbHeight(0);
+    });
+    return () => {
+      try { showSub.remove(); } catch {}
+      try { hideSub.remove(); } catch {}
+    };
   }, [visible]);
 
   return (
@@ -91,12 +59,12 @@ export function FormModal({ visible, title, onClose, children, error }: FormModa
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      <KeyboardAvoidingView
-        style={s.fill}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <View style={s.fill}>
         <Pressable style={s.overlay} onPress={onClose}>
-          <Pressable style={s.sheet} onPress={(e) => e.stopPropagation()}>
+          <Pressable
+            style={[s.sheet, kbHeight > 0 ? { marginBottom: kbHeight } : null]}
+            onPress={(e) => e.stopPropagation()}
+          >
             <View style={s.handleWrap}>
               <View style={s.handle} />
             </View>
@@ -113,14 +81,9 @@ export function FormModal({ visible, title, onClose, children, error }: FormModa
               contentContainerStyle={s.body}
               keyboardShouldPersistTaps="handled"
               keyboardDismissMode="interactive"
-              // onScrollBeginDrag/onFocus bubbling nao captura bem,
-              // entao usamos MeasureLayout em cada TextInput focado
               onScrollBeginDrag={() => {}}
             >
-              {/* Children recebem onInputFocus via prop, mas como nao queremos
-                  mudar a API dos forms, interceptamos via onFocus dos inputs
-                  via clone do onFocus original. Hack leve mas funciona: */}
-              <FocusCatcher onFocus={onInputFocus}>{children}</FocusCatcher>
+              {children}
             </ScrollView>
 
             {error ? (
@@ -130,46 +93,9 @@ export function FormModal({ visible, title, onClose, children, error }: FormModa
             ) : null}
           </Pressable>
         </Pressable>
-      </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
-}
-
-/**
- * Intercepta onFocus de qq TextInput/Pressable dentro do children
- * e chama o onFocusFocus alem do onFocus original.
- *
- * Isso evita ter que mexer em todos os forms (TextInputField, NumberInputField,
- * DateInputField, SelectField). O React chama onFocus em ordem de bubbles
- * (do children pro parent), entao o FocusCatcher por volta detecta primeiro.
- */
-function FocusCatcher({
-  children,
-  onFocus,
-}: {
-  children: React.ReactNode;
-  onFocus: (e: any) => void;
-}) {
-  // React.cloneElement adiciona o handler em todos os inputs
-  // (TextInput, Pressable que tenha onFocus, etc)
-  const wrap = (node: React.ReactNode): React.ReactNode => {
-    if (!React.isValidElement(node)) return node;
-    const el = node as React.ReactElement<any>;
-    const props: any = { ...el.props };
-    // Adiciona handler de focus que NAO substitui o original
-    if (props.onFocus && typeof props.onFocus === 'function') {
-      const original = props.onFocus;
-      props.onFocus = (e: any) => { onFocus(e); original(e); };
-    } else {
-      props.onFocus = onFocus;
-    }
-    // Recursivo para children aninhados
-    if (props.children) {
-      props.children = React.Children.map(props.children, wrap);
-    }
-    return React.cloneElement(el, props);
-  };
-  return <>{React.Children.map(children, wrap)}</>;
 }
 
 const s = StyleSheet.create({
@@ -181,8 +107,8 @@ const s = StyleSheet.create({
     borderTopRightRadius: radius.display,
     borderTopWidth: 1,
     borderColor: colors.border,
-    // Era 90% - reduzido pra 75% pra dar mais espaco pro teclado sem
-    // cobrir o conteudo. O scroll interno cuida do resto.
+    // maxHeight 75% garante que o sheet nao ocupe a tela toda,
+    // deixando espaco pro header em cima + visual do overlay.
     maxHeight: '75%',
   },
   handleWrap: { alignItems: 'center', paddingTop: 8, paddingBottom: 4 },

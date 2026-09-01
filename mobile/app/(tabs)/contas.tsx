@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Pressable } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Check } from 'lucide-react-native';
 import { useTheme, useStyles } from '../../src/lib/AppThemeProvider';
@@ -98,7 +98,25 @@ export default function BillsScreen() {
           <View style={s.display}>
             <Text style={s.title}>Histórico</Text>
             {[...paid, ...overdue].map((b) => (
-              <View key={b.id} style={[s.row, b.status === 'PAID' && s.rowDone]}>
+              <Pressable
+                key={b.id}
+                onPress={() => togglePaid(b.id)}
+                onLongPress={() => {
+                  Alert.alert(
+                    'Remover conta',
+                    `Deseja remover "${b.title}"? Esta acao nao pode ser desfeita.`,
+                    [
+                      { text: 'Cancelar', style: 'cancel' },
+                      { text: 'Remover', style: 'destructive', onPress: () => { void remove(b.id); } },
+                    ],
+                    { cancelable: true }
+                  );
+                }}
+                style={[s.row, b.status === 'PAID' && s.rowDone]}
+                accessibilityRole="button"
+                accessibilityLabel={`Desmarcar ${b.title} como paga`}
+                accessibilityHint="Toque longo para remover"
+              >
                 <View style={[s.checkbox, b.status === 'PAID' && s.checkboxDone]}>
                   {b.status === 'PAID' && <Check size={12} color={colors.textOnNeon} />}
                 </View>
@@ -113,7 +131,7 @@ export default function BillsScreen() {
                 <Text style={[s.billAmount, b.status === 'PAID' && s.strikethrough]}>
                   {fmt(b.amount)}
                 </Text>
-              </View>
+              </Pressable>
             ))}
             <View style={s.summaryRow}>
               <Text style={s.summaryLabel}>Total pago</Text>

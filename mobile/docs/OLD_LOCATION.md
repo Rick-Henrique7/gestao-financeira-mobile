@@ -1,0 +1,1 @@
+﻿movido pra /mobile-screenshots na raiz

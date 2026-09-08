@@ -22,17 +22,10 @@
 
 ---
 
-## 📸 Screenshot
-
-> ⚠️ _Substitua a imagem abaixo pelo screenshot real do app rodando._
-> **Como adicionar:**
-> 1. Tira um print do app no celular (recomendado: tela inicial com cofrinhos)
-> 2. Salva como `mobile-screenshots/screenshot-home.png` (ou outro nome)
-> 3. Faz commit: `git add mobile-screenshots/ && git commit -m "docs: add home screenshot"`
-> 4. A imagem aparece automaticamente aqui
+## 📸 Screenshot. Ainda em Desenvolvimento...
 
 <p align="center">
-  <img src="mobile-screenshots/screenshot-home.png" alt="Tela inicial do app" width="320" />
+  <img width="200" height="400" alt="finance-app" src="https://github.com/user-attachments/assets/2d077ffc-c099-406b-a86c-cd337957a683" alt="Tela inicial do app" width="320" />
 </p>
 
 > 💡 **Dica de composição:** tira o print com algum dado já cadastrado (1-2 contas, 1 cofrinho, 1 assinatura) pra Home e Drawer aparecerem com conteúdo real. Se quiser mostrar mais telas, é só adicionar mais `<img>` em sequência.

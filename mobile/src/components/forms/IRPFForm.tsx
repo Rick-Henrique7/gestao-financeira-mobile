@@ -1,23 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, Text, StyleSheet } from 'react-native';
 import { FormModal } from '../form/FormModal';
 import { FormField } from '../form/FormField';
 import { TextInputField } from '../form/TextInputField';
 import { NumberInputField } from '../form/NumberInputField';
 import { SelectField } from '../form/SelectField';
-import { ImagePickerField } from '../form/ImagePickerField';
 import { colors, radius, spacing, typography } from '../../lib/theme';
 import { useIRPFStore } from '../../stores/irpfStore';
+import type { IRPFRecord } from '../../types';
 
-const categoryOptions = [
-  { value: 'cat-rv', label: 'Renda Variavel' },
-  { value: 'cat-rt', label: 'Rendimentos' },
-  { value: 'cat-bd', label: 'Bens e Direitos' },
-  { value: 'cat-dd', label: 'Deducoes' },
-];
+interface IRPFFormProps {
+  visible: boolean;
+  onClose: () => void;
+  /** Quando definido, o form entra em modo edicao */
+  edit?: IRPFRecord | null;
+}
 
-export function IRPFForm({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+export function IRPFForm({ visible, onClose, edit }: IRPFFormProps) {
   const add = useIRPFStore((s) => s.add);
+  const update = useIRPFStore((s) => s.update);
+  const categories = useIRPFStore((s) => s.categories);
+
   const [title, setTitle] = useState('');
   const [fiscalYear, setFiscalYear] = useState(String(new Date().getFullYear()));
   const [categoryId, setCategoryId] = useState<string>('cat-rv');
@@ -30,35 +33,78 @@ export function IRPFForm({ visible, onClose }: { visible: boolean; onClose: () =
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const reset = () => {
-    setTitle(''); setFiscalYear(String(new Date().getFullYear()));
-    setCategoryId('cat-rv'); setCnpjCpf(''); setGrossValue('');
-    setTicker(''); setQuantity(''); setAvgPrice(''); setDescription('');
-    setError(null);
-  };
+  const isEdit = !!edit;
+
+  // Inicializa campos com valores do edit (ou defaults)
+  useEffect(() => {
+    if (visible) {
+      if (edit) {
+        setTitle(edit.title);
+        setFiscalYear(String(edit.fiscal_year));
+        setCategoryId(edit.category_id);
+        setCnpjCpf(edit.cnpj_cpf ?? '');
+        setGrossValue(String(edit.gross_value ?? ''));
+        setTicker(edit.ticker ?? '');
+        setQuantity(String(edit.quantity ?? ''));
+        setAvgPrice(String(edit.avg_price ?? ''));
+        setDescription(edit.description ?? '');
+      } else {
+        setTitle('');
+        setFiscalYear(String(new Date().getFullYear()));
+        setCategoryId(categories[0]?.id ?? 'cat-rv');
+        setCnpjCpf(''); setGrossValue(''); setTicker('');
+        setQuantity(''); setAvgPrice(''); setDescription('');
+      }
+      setError(null);
+    }
+  }, [visible, edit, categories]);
+
+  const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
+  // Fallback se ainda nao carregou
+  if (categoryOptions.length === 0) {
+    categoryOptions.push(
+      { value: 'cat-rv', label: 'Renda Variavel' },
+      { value: 'cat-rt', label: 'Rendimentos' },
+      { value: 'cat-bd', label: 'Bens e Direitos' },
+      { value: 'cat-dd', label: 'Deducoes' },
+    );
+  }
 
   const onSubmit = async () => {
     setError(null);
     if (!title.trim()) return setError('Titulo obrigatorio');
     const yr = parseInt(fiscalYear, 10);
     if (isNaN(yr) || yr < 2000 || yr > 2100) return setError('Ano invalido');
-    const gv = parseFloat(grossValue) || 0;
-    const q = parseFloat(quantity) || 0;
-    const ap = parseFloat(avgPrice) || 0;
+    const gv = parseFloat(grossValue.replace(',', '.')) || 0;
+    const q = parseFloat(quantity.replace(',', '.')) || 0;
+    const ap = parseFloat(avgPrice.replace(',', '.')) || 0;
     setSubmitting(true);
     try {
-      await add({
-        title: title.trim(),
-        fiscal_year: yr,
-        category_id: categoryId,
-        cnpj_cpf: cnpjCpf.trim() || undefined,
-        gross_value: gv,
-        ticker: ticker.trim() || undefined,
-        quantity: q,
-        avg_price: ap,
-        description: description.trim() || undefined,
-      });
-      reset();
+      if (isEdit && edit) {
+        await update(edit.id, {
+          title: title.trim(),
+          fiscal_year: yr,
+          category_id: categoryId,
+          cnpj_cpf: cnpjCpf.trim() || undefined,
+          gross_value: gv,
+          ticker: ticker.trim() || undefined,
+          quantity: q,
+          avg_price: ap,
+          description: description.trim() || undefined,
+        });
+      } else {
+        await add({
+          title: title.trim(),
+          fiscal_year: yr,
+          category_id: categoryId,
+          cnpj_cpf: cnpjCpf.trim() || undefined,
+          gross_value: gv,
+          ticker: ticker.trim() || undefined,
+          quantity: q,
+          avg_price: ap,
+          description: description.trim() || undefined,
+        });
+      }
       onClose();
     } catch (e) {
       setError((e as Error).message);
@@ -68,7 +114,12 @@ export function IRPFForm({ visible, onClose }: { visible: boolean; onClose: () =
   };
 
   return (
-    <FormModal visible={visible} title="Novo registro IRPF" onClose={onClose} error={error}>
+    <FormModal
+      visible={visible}
+      title={isEdit ? 'Editar registro IRPF' : 'Novo registro IRPF'}
+      onClose={onClose}
+      error={error}
+    >
       <FormField label="Titulo" required>
         <TextInputField value={title} onChangeText={setTitle} placeholder="Ex: Acoes PETR4" maxLength={100} />
       </FormField>
@@ -101,11 +152,8 @@ export function IRPFForm({ visible, onClose }: { visible: boolean; onClose: () =
       <FormField label="Descricao">
         <TextInputField value={description} onChangeText={setDescription} placeholder="Opcional" maxLength={200} multiline />
       </FormField>
-      <FormField label="Comprovante" hint="Anexe a nota de corretora ou informe">
-        <ImagePickerField />
-      </FormField>
       <Pressable onPress={onSubmit} disabled={submitting} style={[s.btn, submitting && s.btnDisabled]}>
-        <Text style={s.btnText}>{submitting ? 'Salvando...' : 'Adicionar'}</Text>
+        <Text style={s.btnText}>{submitting ? 'Salvando...' : (isEdit ? 'Salvar alteracoes' : 'Adicionar')}</Text>
       </Pressable>
     </FormModal>
   );

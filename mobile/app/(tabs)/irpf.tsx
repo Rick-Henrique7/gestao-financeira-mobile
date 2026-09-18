@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Pressable } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Check, AlertCircle } from 'lucide-react-native';
+import { Check, AlertCircle, Trash2 } from 'lucide-react-native';
 import { useTheme, useStyles } from '../../src/lib/AppThemeProvider';
 import { useIRPFStore } from '../../src/stores/irpfStore';
 import { fmt } from '../../src/lib/format';
 import { FAB } from '../../src/components/form/FAB';
 import { IRPFForm } from '../../src/components/forms/IRPFForm';
 import { ScreenTitle } from '../../src/components/ScreenTitle';
+import type { IRPFRecord } from '../../src/types';
 
 export default function IRPFTabScreen() {
   const { colors } = useTheme();
@@ -36,6 +37,7 @@ export default function IRPFTabScreen() {
       backgroundColor: t.colors.surface, padding: t.spacing.md,
       borderRadius: t.radius.display, borderWidth: 1, borderColor: t.colors.border,
     },
+    rowPressed: { backgroundColor: t.colors.surfaceHigh },
     statusIcon: { width: 32, height: 32, borderRadius: t.radius.button, alignItems: 'center' as const, justifyContent: 'center' as const },
     statusIconDone: { backgroundColor: t.colors.accent },
     statusIconPending: { backgroundColor: 'rgba(251, 191, 36, 0.15)' },
@@ -49,11 +51,22 @@ export default function IRPFTabScreen() {
     pillTextPending: { color: '#FBBF24' },
     empty: { color: t.colors.textMuted, fontSize: t.typography.size.md, textAlign: 'center' as const, paddingVertical: t.spacing.lg },
     loading: { marginTop: t.spacing.xl },
+    rowActions: {
+      flexDirection: 'column' as const, alignItems: 'center' as const, gap: 4,
+    },
+    rowActionBtn: {
+      width: 28, height: 28, borderRadius: 14,
+      backgroundColor: t.colors.surfaceHigh, alignItems: 'center' as const, justifyContent: 'center' as const,
+      borderWidth: 1, borderColor: t.colors.border,
+    },
+    rowActionBtnDanger: { borderColor: 'rgba(248, 113, 113, 0.3)' },
+    hint: { color: t.colors.textMuted, fontSize: 11, marginTop: t.spacing.xs, fontStyle: 'italic' as const },
   }));
 
-  const { records, categories, loading, refresh, refreshCategories } = useIRPFStore();
+  const { records, categories, loading, refresh, refreshCategories, remove } = useIRPFStore();
   const [activeTab, setActiveTab] = useState<string>('');
   const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<IRPFRecord | null>(null);
 
   useEffect(() => {
     refresh();
@@ -72,6 +85,28 @@ export default function IRPFTabScreen() {
   const done = records.filter((r) => r.status === 'ATTACHED').length;
   const total = records.length;
   const progressPct = total > 0 ? (done / total) * 100 : 0;
+
+  const onEdit = (rec: IRPFRecord) => {
+    setEditing(rec);
+    setFormOpen(true);
+  };
+
+  const onCloseForm = () => {
+    setFormOpen(false);
+    setEditing(null);
+  };
+
+  const confirmDelete = (rec: IRPFRecord) => {
+    Alert.alert(
+      'Remover registro IRPF',
+      `Deseja remover "${rec.title}"? Esta acao nao pode ser desfeita.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Remover', style: 'destructive', onPress: () => { void remove(rec.id); } },
+      ],
+      { cancelable: true }
+    );
+  };
 
   return (
     <SafeAreaView style={s.root} edges={['top', 'bottom']}>
@@ -115,36 +150,55 @@ export default function IRPFTabScreen() {
             </Text>
           </View>
         ) : (
-          activeRecords.map((r) => {
-            const isAtt = r.status === 'ATTACHED';
-            return (
-              <View key={r.id} style={s.row}>
-                <View style={[s.statusIcon, isAtt ? s.statusIconDone : s.statusIconPending]}>
-                  {isAtt ? (
-                    <Check size={18} color={colors.textOnNeon} strokeWidth={3} />
-                  ) : (
-                    <AlertCircle size={18} color="#FBBF24" strokeWidth={3} />
-                  )}
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={s.rowTitle}>{r.title}</Text>
-                  <Text style={s.rowMeta}>
-                    {fmt(r.gross_value)}{r.ticker ? ` · ${r.ticker}` : ''}
-                  </Text>
-                </View>
-                <View style={[s.pill, isAtt ? s.pillDone : s.pillPending]}>
-                  <Text style={[s.pillText, isAtt ? s.pillTextDone : s.pillTextPending]}>
-                    {isAtt ? 'Anexado' : 'Pendente'}
-                  </Text>
-                </View>
-              </View>
-            );
-          })
+          <>
+            {activeRecords.map((r) => {
+              const isAtt = r.status === 'ATTACHED';
+              return (
+                <Pressable
+                  key={r.id}
+                  onPress={() => onEdit(r)}
+                  style={({ pressed }) => [s.row, pressed && s.rowPressed]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Editar ${r.title}`}
+                  accessibilityHint="Toque para editar, icone de lixeira para remover"
+                >
+                  <View style={[s.statusIcon, isAtt ? s.statusIconDone : s.statusIconPending]}>
+                    {isAtt ? (
+                      <Check size={18} color={colors.textOnNeon} strokeWidth={3} />
+                    ) : (
+                      <AlertCircle size={18} color="#FBBF24" strokeWidth={3} />
+                    )}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.rowTitle}>{r.title}</Text>
+                    <Text style={s.rowMeta}>
+                      {fmt(r.gross_value)}{r.ticker ? ` · ${r.ticker}` : ''}
+                    </Text>
+                  </View>
+                  <View style={[s.pill, isAtt ? s.pillDone : s.pillPending]}>
+                    <Text style={[s.pillText, isAtt ? s.pillTextDone : s.pillTextPending]}>
+                      {isAtt ? 'Anexado' : 'Pendente'}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={(e) => { e.stopPropagation(); confirmDelete(r); }}
+                    style={s.rowActionBtnDanger}
+                    hitSlop={6}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remover ${r.title}`}
+                  >
+                    <Trash2 size={14} color={colors.danger} />
+                  </Pressable>
+                </Pressable>
+              );
+            })}
+            <Text style={s.hint}>Toque para editar · Lixeira para remover</Text>
+          </>
         )}
       </ScrollView>
 
       <FAB onPress={() => setFormOpen(true)} accessibilityLabel="Adicionar registro IRPF" />
-      <IRPFForm visible={formOpen} onClose={() => setFormOpen(false)} />
+      <IRPFForm visible={formOpen} onClose={onCloseForm} edit={editing} />
     </SafeAreaView>
   );
 }

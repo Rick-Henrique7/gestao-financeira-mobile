@@ -3,6 +3,7 @@ import { migration001 } from './migrations/001_init';
 import { migration002 } from './migrations/002_seed';
 import { migration003 } from './migrations/003_goal_deposits';
 import { migration004 } from './migrations/004_goals_enhance';
+import { migration005 } from './migrations/005_notification_prefs';
 
 // ─── DB SINGLETON (SQLite local, offline-first) ─────────────────────────────
 const DB_NAME = 'sgf.db';
@@ -86,6 +87,7 @@ const migrations: Migration[] = [
   { name: '002_seed',           sql: migration002 },
   { name: '003_goal_deposits',  sql: migration003 },
   { name: '004_goals_enhance',  sql: migration004 },
+  { name: '005_notification_prefs', sql: migration005 },
 ];
 
 async function runMigrations(db: SQLite.SQLiteDatabase) {

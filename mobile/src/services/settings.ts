@@ -10,6 +10,9 @@ const DEFAULT_SETTINGS: NewUserSettings = {
   biometric_enabled: 0,
   notification_default_time: '09:00',
   hide_values: 0,
+  notify_due_soon: 1,
+  notify_goal_milestone: 1,
+  notify_budget_exceeded: 1,
 };
 
 export async function getSettings(): Promise<UserSettings> {
@@ -37,6 +40,9 @@ export async function updateSettings(patch: Partial<NewUserSettings>): Promise<U
        biometric_enabled = ?,
        notification_default_time = ?,
        hide_values = ?,
+       notify_due_soon = ?,
+       notify_goal_milestone = ?,
+       notify_budget_exceeded = ?,
        updated_at = datetime('now')
      WHERE id = 1`,
     next.display_name,
@@ -44,7 +50,10 @@ export async function updateSettings(patch: Partial<NewUserSettings>): Promise<U
     next.monthly_salary,
     next.biometric_enabled,
     next.notification_default_time,
-    next.hide_values
+    next.hide_values,
+    next.notify_due_soon ?? 1,
+    next.notify_goal_milestone ?? 1,
+    next.notify_budget_exceeded ?? 1
   );
   return getSettings();
 }

@@ -179,6 +179,9 @@ export interface UserSettings {
   biometric_enabled: 0 | 1;
   notification_default_time: string;
   hide_values: 0 | 1;
+  notify_due_soon: 0 | 1;
+  notify_goal_milestone: 0 | 1;
+  notify_budget_exceeded: 0 | 1;
   created_at: string;
   updated_at: string;
 }

@@ -150,29 +150,29 @@ export default function ExportScreen() {
     if (subs.length) {
       parts.push('\n# Assinaturas');
       parts.push(toCSV(
-        ['id', 'servico', 'valor_mensal', 'categoria', 'inicio', 'status'],
-        subs.map((sub) => [sub.id, sub.service_name, sub.monthly_cost, sub.category ?? '', sub.start_date, sub.status]),
+        ['id', 'servico', 'valor_mensal', 'dia_cobranca', 'categoria', 'status'],
+        subs.map((sub) => [sub.id, sub.service_name, sub.monthly_cost, sub.billing_day, sub.category ?? '', sub.status]),
       ));
     }
     if (goals.length) {
       parts.push('\n# Cofrinhos');
       parts.push(toCSV(
         ['id', 'nome', 'alvo', 'atual', 'vencimento'],
-        goals.map((g) => [g.id, g.name, g.target_amount, g.current_amount, g.deadline ?? '']),
+        goals.map((g) => [g.id, g.title, g.target_amount, g.current_amount, g.target_date ?? '']),
       ));
     }
     if (loans.length) {
       parts.push('\n# Empréstimos');
       parts.push(toCSV(
-        ['id', 'credor', 'valor_original', 'taxa_mensal', 'parcelas', 'data'],
-        loans.map((l) => [l.id, l.creditor, l.original_amount, l.monthly_rate, l.installments, l.loan_date]),
+        ['id', 'devedor', 'valor', 'recebido', 'data', 'vencimento', 'status'],
+        loans.map((l) => [l.id, l.debtor_name, l.amount, l.amount_paid, l.loan_date, l.due_date, l.status]),
       ));
     }
     if (transactions.length) {
       parts.push('\n# Lançamentos');
       parts.push(toCSV(
         ['id', 'tipo', 'valor', 'categoria', 'descricao', 'data'],
-        transactions.map((t) => [t.id, t.type, t.amount, t.category, t.description ?? '', t.date]),
+        transactions.map((t) => [t.id, t.type, t.amount, t.category, t.description ?? '', t.transaction_date]),
       ));
     }
     if (irpfRecords.length) {
@@ -211,22 +211,22 @@ export default function ExportScreen() {
         headers: ['Nome', 'Alvo', 'Atual', 'Progresso', 'Vencimento'],
         rows: goals.map((g) => {
           const pct = g.target_amount > 0 ? Math.round((g.current_amount / g.target_amount) * 100) : 0;
-          return [g.name, fmt(g.target_amount), fmt(g.current_amount), `${pct}%`, g.deadline ?? '-'];
+          return [g.title, fmt(g.target_amount), fmt(g.current_amount), `${pct}%`, g.target_date ?? '-'];
         }),
       });
     }
     if (loans.length) {
       sections.push({
         name: 'Empréstimos',
-        headers: ['Credor', 'Valor', 'Taxa/mês', 'Parcelas', 'Data'],
-        rows: loans.map((l) => [l.creditor, fmt(l.original_amount), `${l.monthly_rate}%`, String(l.installments), l.loan_date]),
+        headers: ['Devedor', 'Valor', 'Recebido', 'Emprestado em', 'Vencimento', 'Status'],
+        rows: loans.map((l) => [l.debtor_name, fmt(l.amount), fmt(l.amount_paid), l.loan_date, l.due_date, l.status]),
       });
     }
     if (transactions.length) {
       sections.push({
         name: 'Lançamentos',
         headers: ['Tipo', 'Valor', 'Categoria', 'Descrição', 'Data'],
-        rows: transactions.map((t) => [t.type, fmt(t.amount), t.category, t.description ?? '-', t.date]),
+        rows: transactions.map((t) => [t.type, fmt(t.amount), t.category, t.description ?? '-', t.transaction_date]),
       });
     }
     if (irpfRecords.length) {

@@ -1,10 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, TextInput, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calculator, TrendingUp, Wallet } from 'lucide-react-native';
 import { fmt } from '../src/lib/format';
 import { colors, radius, spacing, typography } from '../src/lib/theme';
 import { ScreenTitle } from '../src/components/ScreenTitle';
+import { useBillsStore } from '../src/stores/billsStore';
+import { useSubsStore } from '../src/stores/subscriptionsStore';
+import { useCashflowStore } from '../src/stores/cashflowStore';
 
 export default function SimulacoesScreen() {
   const [jc, setJc] = useState({ capital: '10000', taxa: '1', periodo: '12' });
@@ -29,6 +32,35 @@ export default function SimulacoesScreen() {
     const liquido = bruto - ir;
     return { montante: P + liquido, bruto, ir, liquido, aliquotaPct: aliquota * 100 };
   }, [rf]);
+
+  // Saude Financeira — resumo do mes com dados reais
+  const { bills } = useBillsStore();
+  const { subs } = useSubsStore();
+  const { summary, refresh: refreshCashflow } = useCashflowStore();
+
+  const monthRange = () => {
+    const now = new Date();
+    const first = new Date(now.getFullYear(), now.getMonth(), 1);
+    const last  = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const iso = (d: Date) => d.toISOString().slice(0, 10);
+    return { start: iso(first), end: iso(last) };
+  };
+
+  useEffect(() => {
+    const { start, end } = monthRange();
+    refreshCashflow(start, end);
+  }, [refreshCashflow]);
+
+  const monthBillsTotal = bills
+    .filter((b) => b.status === 'PENDING' || b.status === 'OVERDUE')
+    .reduce((acc, b) => acc + b.amount, 0);
+  const monthSubsTotal = subs
+    .filter((sub) => sub.status === 'ACTIVE')
+    .reduce((acc, sub) => acc + sub.monthly_cost, 0);
+  const fixedExpenses = monthBillsTotal + monthSubsTotal;
+  const variableExpenses = Math.max(0, summary.expense - fixedExpenses);
+  const renda = summary.income || 0;
+  const saldoLivre = renda - summary.expense;
 
   const inputCls = {
     backgroundColor: colors.surfaceHigh, borderWidth: 1, borderColor: colors.border,
@@ -159,22 +191,39 @@ export default function SimulacoesScreen() {
             </View>
             <View>
               <Text style={s.title}>Saúde Financeira</Text>
-              <Text style={s.formula}>Resumo do mês</Text>
+              <Text style={s.formula}>Resumo do mês corrente</Text>
             </View>
           </View>
-          <View style={s.healthGrid}>
-            {[
-              { label: 'Renda',            val: 12500,   color: colors.accent },
-              { label: 'Despesas Fixas',   val: 6267.5,  color: colors.text },
-              { label: 'Gastos Variáveis',  val: 2540,    color: '#FB923C' },
-              { label: 'Saldo Livre',      val: 3692.5,  color: '#60A5FA' },
-            ].map((item) => (
-              <View key={item.label} style={s.healthCard}>
-                <Text style={[s.healthValue, { color: item.color }]}>{fmt(item.val)}</Text>
-                <Text style={s.healthLabel}>{item.label}</Text>
+          {summary.income === 0 && summary.expense === 0 && fixedExpenses === 0 ? (
+            <Text style={s.healthEmpty}>
+              Cadastre receitas, contas ou assinaturas para ver seu resumo mensal.
+            </Text>
+          ) : (
+            <View style={s.healthGrid}>
+              <View style={s.healthCard}>
+                <Text style={[s.healthValue, { color: colors.accent }]}>{fmt(renda)}</Text>
+                <Text style={s.healthLabel}>Renda</Text>
               </View>
-            ))}
-          </View>
+              <View style={s.healthCard}>
+                <Text style={[s.healthValue, { color: colors.text }]}>{fmt(fixedExpenses)}</Text>
+                <Text style={s.healthLabel}>Despesas Fixas</Text>
+              </View>
+              <View style={s.healthCard}>
+                <Text style={[s.healthValue, { color: '#FB923C' }]}>{fmt(variableExpenses)}</Text>
+                <Text style={s.healthLabel}>Gastos Variaveis</Text>
+              </View>
+              <View style={s.healthCard}>
+                <Text style={[s.healthValue, { color: saldoLivre >= 0 ? '#60A5FA' : colors.danger }]}>
+                  {fmt(saldoLivre)}
+                </Text>
+                <Text style={s.healthLabel}>Saldo Livre</Text>
+              </View>
+            </View>
+          )}
+          <Text style={s.healthHint}>
+            Fixas = contas a pagar (pendentes/vencidas) + assinaturas ativas.{'\n'}
+            Variaveis = lancamentos do caixa (despesas - fixas).
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -215,4 +264,12 @@ const s = StyleSheet.create({
   },
   healthValue: { fontSize: typography.size.lg, fontWeight: typography.weight.bold, fontFamily: typography.fontFamily.mono },
   healthLabel: { color: colors.muted, fontSize: typography.size.xs, marginTop: 4 },
+  healthEmpty: {
+    color: colors.muted, fontSize: typography.size.sm, textAlign: 'center',
+    paddingVertical: spacing.lg,
+  },
+  healthHint: {
+    color: colors.muted, fontSize: typography.size.xs, marginTop: spacing.md,
+    lineHeight: 16,
+  },
 });

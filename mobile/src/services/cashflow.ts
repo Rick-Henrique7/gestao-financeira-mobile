@@ -47,6 +47,32 @@ export async function getCashflow(id: string): Promise<CashflowTransaction | nul
   return r ?? null;
 }
 
+export async function updateCashflow(id: string, patch: Partial<NewCashflowTransaction>): Promise<CashflowTransaction> {
+  const db = await getDB();
+  const current = await getCashflow(id);
+  if (!current) throw new ServiceError('NOT_FOUND', `Cashflow ${id} not found`);
+  const next = {
+    type:             patch.type             ?? current.type,
+    category:         patch.category?.trim() ?? current.category,
+    amount:           patch.amount           ?? current.amount,
+    transaction_date: patch.transaction_date ?? current.transaction_date,
+    description:      patch.description      ?? current.description,
+  };
+  await db.runAsync(
+    `UPDATE cashflow_transactions
+       SET type=?, category=?, amount=?, transaction_date=?, description=?,
+           updated_at=datetime('now')
+     WHERE id=?`,
+    next.type,
+    next.category,
+    next.amount,
+    next.transaction_date,
+    next.description,
+    id
+  );
+  return (await getCashflow(id))!;
+}
+
 export async function deleteCashflow(id: string): Promise<void> {
   const db = await getDB();
   const result = await db.runAsync(

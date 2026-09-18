@@ -38,6 +38,36 @@ export async function createSub(input: NewSubscription): Promise<Subscription> {
   return (await getSub(id))!;
 }
 
+export async function updateSub(id: string, patch: Partial<NewSubscription>): Promise<Subscription> {
+  const db = await getDB();
+  const current = await getSub(id);
+  if (!current) throw new ServiceError('NOT_FOUND', `Sub ${id} not found`);
+  const next = {
+    service_name: patch.service_name?.trim() ?? current.service_name,
+    monthly_cost: patch.monthly_cost ?? current.monthly_cost,
+    billing_day: patch.billing_day ?? current.billing_day,
+    status: patch.status ?? current.status,
+    category: patch.category ?? current.category,
+    color: patch.color ?? current.color,
+    initials: patch.initials?.slice(0, 2).toUpperCase() ?? current.initials,
+  };
+  await db.runAsync(
+    `UPDATE subscriptions
+       SET service_name=?, monthly_cost=?, billing_day=?, status=?,
+           category=?, color=?, initials=?, updated_at=datetime('now')
+     WHERE id=?`,
+    next.service_name,
+    next.monthly_cost,
+    next.billing_day,
+    next.status,
+    next.category,
+    next.color,
+    next.initials,
+    id
+  );
+  return (await getSub(id))!;
+}
+
 export async function toggleSubStatus(id: string): Promise<Subscription> {
   const db = await getDB();
   const sub = await getSub(id);

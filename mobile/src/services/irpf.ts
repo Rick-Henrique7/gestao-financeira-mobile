@@ -47,6 +47,47 @@ export async function createIRPF(input: NewIRPFRecord): Promise<IRPFRecord> {
   return (await db.getFirstAsync<IRPFRecord>('SELECT * FROM irpf_records WHERE id = ?', id))!;
 }
 
+export async function updateIRPF(id: string, patch: Partial<NewIRPFRecord>): Promise<IRPFRecord> {
+  const db = await getDB();
+  const current = await db.getFirstAsync<IRPFRecord>('SELECT * FROM irpf_records WHERE id = ?', id);
+  if (!current) throw new ServiceError('NOT_FOUND', `IRPF record ${id} not found`);
+  const next = {
+    category_id:    patch.category_id    ?? current.category_id,
+    fiscal_year:    patch.fiscal_year    ?? current.fiscal_year,
+    title:          patch.title?.trim()  ?? current.title,
+    cnpj_cpf:       patch.cnpj_cpf       ?? current.cnpj_cpf,
+    gross_value:    patch.gross_value    ?? current.gross_value,
+    deductible_value: patch.deductible_value ?? current.deductible_value,
+    irrf_tax:       patch.irrf_tax       ?? current.irrf_tax,
+    ticker:         patch.ticker         ?? current.ticker,
+    quantity:       patch.quantity       ?? current.quantity,
+    avg_price:      patch.avg_price      ?? current.avg_price,
+    description:    patch.description    ?? current.description,
+    status:         patch.status         ?? current.status,
+  };
+  await db.runAsync(
+    `UPDATE irpf_records
+       SET category_id=?, fiscal_year=?, title=?, cnpj_cpf=?, gross_value=?,
+           deductible_value=?, irrf_tax=?, ticker=?, quantity=?, avg_price=?,
+           description=?, status=?, updated_at=datetime('now')
+     WHERE id=?`,
+    next.category_id,
+    next.fiscal_year,
+    next.title,
+    next.cnpj_cpf,
+    next.gross_value,
+    next.deductible_value,
+    next.irrf_tax,
+    next.ticker,
+    next.quantity,
+    next.avg_price,
+    next.description,
+    next.status,
+    id
+  );
+  return (await db.getFirstAsync<IRPFRecord>('SELECT * FROM irpf_records WHERE id = ?', id))!;
+}
+
 export async function markIRPFAttached(id: string): Promise<void> {
   const db = await getDB();
   await db.runAsync(

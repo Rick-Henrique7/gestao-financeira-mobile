@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { listSubs, createSub, toggleSubStatus, deleteSub } from '../services/subscriptions';
+import { listSubs, createSub, toggleSubStatus, deleteSub, updateSub } from '../services/subscriptions';
 import type { Subscription, NewSubscription } from '../types';
 
 interface SubsState {
@@ -9,6 +9,7 @@ interface SubsState {
   refresh: () => Promise<void>;
   add: (s: NewSubscription) => Promise<void>;
   toggle: (id: string) => Promise<void>;
+  update: (id: string, patch: Partial<NewSubscription>) => Promise<void>;
   remove: (id: string) => Promise<void>;
 }
 
@@ -44,6 +45,17 @@ export const useSubsStore = create<SubsState>((set) => ({
       set({ subs });
     } catch (e) {
       set({ error: (e as Error).message });
+    }
+  },
+
+  update: async (id, patch) => {
+    try {
+      await updateSub(id, patch);
+      const subs = await listSubs();
+      set({ subs });
+    } catch (e) {
+      set({ error: (e as Error).message });
+      throw e;
     }
   },
 

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import {
-  listIRPF, listCategories, createIRPF, markIRPFAttached, deleteIRPF,
+  listIRPF, listCategories, createIRPF, markIRPFAttached, deleteIRPF, updateIRPF,
 } from '../services/irpf';
 import type { IRPFRecord, NewIRPFRecord, IRPFCategory } from '../types';
 
@@ -13,6 +13,7 @@ interface IRPFState {
   refreshCategories: () => Promise<void>;
   add: (r: NewIRPFRecord) => Promise<void>;
   attach: (id: string) => Promise<void>;
+  update: (id: string, patch: Partial<NewIRPFRecord>) => Promise<void>;
   remove: (id: string) => Promise<void>;
 }
 
@@ -58,6 +59,17 @@ export const useIRPFStore = create<IRPFState>((set) => ({
       set({ records });
     } catch (e) {
       set({ error: (e as Error).message });
+    }
+  },
+
+  update: async (id, patch) => {
+    try {
+      await updateIRPF(id, patch);
+      const records = await listIRPF();
+      set({ records });
+    } catch (e) {
+      set({ error: (e as Error).message });
+      throw e;
     }
   },
 

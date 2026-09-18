@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import {
-  listCashflow, createCashflow, deleteCashflow, getCashflowSummary,
+  listCashflow, createCashflow, deleteCashflow, getCashflowSummary, updateCashflow,
 } from '../services/cashflow';
 import type { CashflowTransaction, NewCashflowTransaction } from '../types';
 
@@ -17,6 +17,7 @@ interface CashflowState {
   error: string | null;
   refresh: (startDate?: string, endDate?: string) => Promise<void>;
   add: (t: NewCashflowTransaction) => Promise<void>;
+  update: (id: string, patch: Partial<NewCashflowTransaction>) => Promise<void>;
   remove: (id: string) => Promise<void>;
 }
 
@@ -49,6 +50,17 @@ export const useCashflowStore = create<CashflowState>((set) => ({
       set({ transactions });
     } catch (e) {
       set({ error: (e as Error).message });
+    }
+  },
+
+  update: async (id, patch) => {
+    try {
+      await updateCashflow(id, patch);
+      const transactions = await listCashflow();
+      set({ transactions });
+    } catch (e) {
+      set({ error: (e as Error).message });
+      throw e;
     }
   },
 

@@ -47,6 +47,13 @@ export default function SettingsScreen() {
   }, [refresh]);
 
   const hide = settings?.hide_values === 1;
+  // Versao lida do package.json (resolve em build time)
+  let appVersion = '1.0.0';
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const pkg = require('../package.json');
+    appVersion = pkg.version ?? '1.0.0';
+  } catch {}
   const notifyDue = settings?.notify_due_soon === 1;
   const notifyGoal = settings?.notify_goal_milestone === 1;
   const notifyBudget = settings?.notify_budget_exceeded === 1;
@@ -208,7 +215,7 @@ export default function SettingsScreen() {
         {renderSection('Dados', sectionDados)}
 
         <Text style={s.version}>Gerenciador Financeiro Mobile</Text>
-        <Text style={s.versionSub}>v1.0.0 · Offline-first · React Native + Expo</Text>
+        <Text style={s.versionSub}>v{appVersion} · Offline-first · React Native + Expo</Text>
       </ScrollView>
 
       <EditAccountModal

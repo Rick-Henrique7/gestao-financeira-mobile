@@ -84,34 +84,44 @@ export const darkColors = {
 } as const;
 
 /**
- * Light theme — SKELETON. Fundo claro, accent neon mantido para identidade
- * visual. Ajustar aqui para refinar a paleta light no futuro.
+ * Light theme — paleta otimizada para modo claro.
+ *
+ * Mantem a identidade neon (#CCF050 accent) porem com backgrounds
+ * claros o suficiente pra ler confortavelmente durante o dia.
+ *
+ * Hierarquia:
+ *  - bgCanvas/base (#F8F9F3) — fundo neutro levemente amarelado
+ *  - surface (#EEF0E5) — cards com leve elevacao
+ *  - surfaceHigh (#FFFFFF) — inputs e elementos mais altos
+ *  - text (#0A0D0A) — preto grafite (mesmo do bgCanvas dark)
+ *  - textMuted (#5A6959) — verde musgo desaturado (combina com accent)
  */
 export const lightColors = {
-  bgCanvas: '#FAFAF7',
-  base: '#FAFAF7',
+  bgCanvas: '#F8F9F3',
+  base: '#F8F9F3',
   accent: '#CCF050',
-  accentBright: '#9FCC00',
+  accentBright: '#7AB800',
   accentSoft: '#E3FA7B',
-  surfaceDark1: '#F0F2E8',
-  surfaceDark2: '#E5E9D8',
-  surface: '#F0F2E8',
+  surfaceDark1: '#E5E8D8',
+  surfaceDark2: '#D8DBC6',
+  surface: '#EEF0E5',
   surfaceHigh: '#FFFFFF',
   text: '#0A0D0A',
   textStrong: '#0A0D0A',
   textOnNeon: '#000000',
   textMuted: '#5A6959',
   muted: '#5A6959',
-  border: 'rgba(10, 13, 10, 0.10)',
+  border: 'rgba(10, 13, 10, 0.12)',
   borderStrong: 'rgba(10, 13, 10, 0.25)',
-  success: '#00B85F',
-  warn: '#E08A00',
-  danger: '#E53935',
+  success: '#00A853',
+  warn: '#C77800',
+  danger: '#D32F2F',
 } as const;
 
 // ─── TEMAS COMPLETOS ───────────────────────────────────────────────────────
 export type ColorScheme = 'light' | 'dark';
-export type ThemeColors = typeof darkColors;
+/** Cores de qualquer tema (dark ou light) — uniao para flexibilidade */
+export type ThemeColors = typeof darkColors | typeof lightColors;
 export type Theme = {
   colors: ThemeColors;
   spacing: typeof spacing;

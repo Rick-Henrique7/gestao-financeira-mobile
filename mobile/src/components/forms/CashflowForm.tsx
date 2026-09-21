@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Pressable, Text, StyleSheet } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import { FormModal } from '../form/FormModal';
 import { FormField } from '../form/FormField';
 import { TextInputField } from '../form/TextInputField';
 import { NumberInputField } from '../form/NumberInputField';
 import { DateInputField } from '../form/DateInputField';
 import { SelectField } from '../form/SelectField';
-import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useStyles } from '../../lib/AppThemeProvider';
 import { useCashflowStore } from '../../stores/cashflowStore';
 import type { CashflowType } from '../../types';
 
@@ -27,6 +27,16 @@ export function CashflowForm({
   defaultType?: CashflowType;
 }) {
   const add = useCashflowStore((s) => s.add);
+
+  const s = useStyles((t) => ({
+    btn: {
+      backgroundColor: t.colors.accent, paddingVertical: 14, borderRadius: t.radius.button,
+      alignItems: 'center' as const, marginTop: t.spacing.md,
+    },
+    btnDisabled: { opacity: 0.5 },
+    btnText: { color: t.colors.textOnNeon, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold },
+  }));
+
   const [type, setType] = useState<CashflowType>(defaultType);
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
@@ -89,11 +99,3 @@ export function CashflowForm({
   );
 }
 
-const s = StyleSheet.create({
-  btn: {
-    backgroundColor: colors.accent, paddingVertical: 14, borderRadius: radius.button,
-    alignItems: 'center', marginTop: spacing.md,
-  },
-  btnDisabled: { opacity: 0.5 },
-  btnText: { color: colors.textOnNeon, fontSize: typography.size.md, fontWeight: typography.weight.bold },
-});

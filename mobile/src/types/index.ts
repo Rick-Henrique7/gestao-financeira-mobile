@@ -166,7 +166,7 @@ export interface DocumentAttachment {
   expires_at: string;
   created_at: string;
 }
-export type NewDocumentAttachment = Omit<DocumentAttachment, 'id' | 'is_backed_up' | 'created_at'> & {
+export type NewDocumentAttachment = Omit<DocumentAttachment, 'is_backed_up' | 'created_at'> & {
   is_backed_up?: 0 | 1;
 };
 

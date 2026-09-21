@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Pressable, Text, StyleSheet, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { FormModal } from '../form/FormModal';
 import { FormField } from '../form/FormField';
 import { TextInputField } from '../form/TextInputField';
 import { NumberInputField } from '../form/NumberInputField';
 import { DateInputField } from '../form/DateInputField';
 import { SelectField } from '../form/SelectField';
-import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useStyles } from '../../lib/AppThemeProvider';
 import { useBillsStore } from '../../stores/billsStore';
 import type { Frequency } from '../../types';
 
@@ -24,6 +24,25 @@ const oneMonth = () => {
 
 export function BillForm({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const add = useBillsStore((s) => s.add);
+
+  const s = useStyles((t) => ({
+    toggleRow: { flexDirection: 'row' as const, gap: t.spacing.sm },
+    toggleBtn: {
+      flex: 1, paddingVertical: 12, borderRadius: t.radius.button,
+      backgroundColor: t.colors.surfaceHigh, alignItems: 'center' as const,
+      borderWidth: 1, borderColor: t.colors.border,
+    },
+    toggleBtnActive: { backgroundColor: t.colors.accent, borderColor: t.colors.accent },
+    toggleText: { color: t.colors.text, fontWeight: t.typography.weight.semibold },
+    toggleTextActive: { color: t.colors.textOnNeon },
+    btn: {
+      backgroundColor: t.colors.accent, paddingVertical: 14, borderRadius: t.radius.button,
+      alignItems: 'center' as const, marginTop: t.spacing.md,
+    },
+    btnDisabled: { opacity: 0.5 },
+    btnText: { color: t.colors.textOnNeon, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold },
+  }));
+
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [dueDate, setDueDate] = useState(oneMonth());
@@ -49,21 +68,18 @@ export function BillForm({ visible, onClose }: { visible: boolean; onClose: () =
     if (isRecurrent && !frequency) return setError('Escolha a frequencia');
     setSubmitting(true);
     try {
-      console.log('[BillForm] onSubmit -> add()');
       await add({
         title: title.trim(),
         amount: a,
         due_date: dueDate,
-        is_recurrent: isRecurrent,
+        is_recurrent: (isRecurrent ? 1 : 0) as 0 | 1,
         frequency: (isRecurrent ? frequency : null) as Frequency | null,
         category: category.trim() || undefined,
         notes: notes.trim() || undefined,
       });
-      console.log('[BillForm] add() OK, fechando modal');
       reset();
       onClose();
     } catch (e) {
-      console.error('[BillForm] add() FALHOU:', e);
       setError((e as Error).message);
     } finally {
       setSubmitting(false);
@@ -116,20 +132,3 @@ export function BillForm({ visible, onClose }: { visible: boolean; onClose: () =
   );
 }
 
-const s = StyleSheet.create({
-  toggleRow: { flexDirection: 'row', gap: spacing.sm },
-  toggleBtn: {
-    flex: 1, paddingVertical: 12, borderRadius: radius.button,
-    backgroundColor: colors.surfaceHigh, alignItems: 'center',
-    borderWidth: 1, borderColor: colors.border,
-  },
-  toggleBtnActive: { backgroundColor: colors.accent, borderColor: colors.accent },
-  toggleText: { color: colors.text, fontWeight: typography.weight.semibold },
-  toggleTextActive: { color: colors.textOnNeon },
-  btn: {
-    backgroundColor: colors.accent, paddingVertical: 14, borderRadius: radius.button,
-    alignItems: 'center', marginTop: spacing.md,
-  },
-  btnDisabled: { opacity: 0.5 },
-  btnText: { color: colors.textOnNeon, fontSize: typography.size.md, fontWeight: typography.weight.bold },
-});

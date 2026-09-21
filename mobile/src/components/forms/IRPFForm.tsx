@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Pressable, Text, StyleSheet } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import { FormModal } from '../form/FormModal';
 import { FormField } from '../form/FormField';
 import { TextInputField } from '../form/TextInputField';
 import { NumberInputField } from '../form/NumberInputField';
 import { SelectField } from '../form/SelectField';
-import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useStyles } from '../../lib/AppThemeProvider';
 import { useIRPFStore } from '../../stores/irpfStore';
 import type { IRPFRecord } from '../../types';
 
@@ -20,6 +20,15 @@ export function IRPFForm({ visible, onClose, edit }: IRPFFormProps) {
   const add = useIRPFStore((s) => s.add);
   const update = useIRPFStore((s) => s.update);
   const categories = useIRPFStore((s) => s.categories);
+
+  const s = useStyles((t) => ({
+    btn: {
+      backgroundColor: t.colors.accent, paddingVertical: 14, borderRadius: t.radius.button,
+      alignItems: 'center' as const, marginTop: t.spacing.md,
+    },
+    btnDisabled: { opacity: 0.5 },
+    btnText: { color: t.colors.textOnNeon, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold },
+  }));
 
   const [title, setTitle] = useState('');
   const [fiscalYear, setFiscalYear] = useState(String(new Date().getFullYear()));
@@ -159,11 +168,3 @@ export function IRPFForm({ visible, onClose, edit }: IRPFFormProps) {
   );
 }
 
-const s = StyleSheet.create({
-  btn: {
-    backgroundColor: colors.accent, paddingVertical: 14, borderRadius: radius.button,
-    alignItems: 'center', marginTop: spacing.md,
-  },
-  btnDisabled: { opacity: 0.5 },
-  btnText: { color: colors.textOnNeon, fontSize: typography.size.md, fontWeight: typography.weight.bold },
-});

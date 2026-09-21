@@ -18,7 +18,7 @@ export function useReducedMotion(): boolean {
       .catch(() => { /* no-op em plataformas que nao suportam */ });
     const sub = AccessibilityInfo.addEventListener(
       'reduceMotionChanged',
-      (e) => { if (mounted) setReduced(e.reduceMotionEnabled); }
+      (e: any) => { if (mounted) setReduced(e?.reduceMotionEnabled ?? false); }
     );
     return () => {
       mounted = false;

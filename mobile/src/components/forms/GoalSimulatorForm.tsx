@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
-import { Pressable, Text, View, StyleSheet } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { TrendingUp, Calendar } from 'lucide-react-native';
 import { FormModal } from '../form/FormModal';
 import { FormField } from '../form/FormField';
 import { NumberInputField } from '../form/NumberInputField';
-import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useStyles, useTheme } from '../../lib/AppThemeProvider';
 import { fmt } from '../../lib/format';
 import type { FinancialGoal } from '../../types';
 
@@ -18,6 +18,45 @@ interface GoalSimulatorFormProps {
 }
 
 export function GoalSimulatorForm({ visible, onClose, goal }: GoalSimulatorFormProps) {
+  const { colors } = useTheme();
+
+  const s = useStyles((t) => ({
+    goalInfo: {
+      backgroundColor: t.colors.surfaceHigh, borderRadius: t.radius.button,
+      padding: t.spacing.md, borderWidth: 1, borderColor: t.colors.border,
+    },
+    goalName: { color: t.colors.text, fontSize: t.typography.size.lg, fontWeight: t.typography.weight.semibold },
+    goalStatsRow: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: t.spacing.md, marginTop: t.spacing.sm },
+    goalStat: { color: t.colors.muted, fontSize: t.typography.size.xs },
+    goalStatVal: { color: t.colors.text, fontWeight: t.typography.weight.semibold },
+    resultBox: {
+      backgroundColor: t.colors.surface, borderRadius: t.radius.button,
+      padding: t.spacing.md, borderWidth: 1, borderColor: t.colors.border,
+      gap: t.spacing.md,
+    },
+    resultTitle: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.semibold },
+    resultRow: { flexDirection: 'row' as const, gap: t.spacing.md },
+    resultItem: { flex: 1, gap: 4 },
+    resultItemHeader: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 4 },
+    resultItemLabel: { color: t.colors.muted, fontSize: t.typography.size.xs },
+    resultItemVal: { color: t.colors.text, fontSize: t.typography.size.lg, fontWeight: t.typography.weight.bold, fontFamily: t.typography.fontFamily.mono },
+    resultItemUnit: { color: t.colors.muted, fontSize: t.typography.size.sm, fontWeight: t.typography.weight.regular },
+    divider: { height: 1, backgroundColor: t.colors.border },
+    savingBox: {
+      flexDirection: 'row' as const, alignItems: 'center' as const, gap: t.spacing.sm,
+      backgroundColor: 'rgba(0, 230, 118, 0.12)',
+      borderRadius: t.radius.button, padding: t.spacing.md,
+      borderWidth: 1, borderColor: 'rgba(0, 230, 118, 0.3)',
+    },
+    savingText: { color: t.colors.success, fontSize: t.typography.size.sm, fontWeight: t.typography.weight.semibold, flex: 1 },
+    resultText: { color: t.colors.muted, fontSize: t.typography.size.sm },
+    btn: {
+      backgroundColor: t.colors.accent, paddingVertical: 14, borderRadius: t.radius.button,
+      alignItems: 'center' as const, marginTop: t.spacing.md,
+    },
+    btnText: { color: t.colors.textOnNeon, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold },
+  }));
+
   const [extra, setExtra] = useState('');
 
   const result = useMemo(() => {
@@ -135,39 +174,3 @@ export function GoalSimulatorForm({ visible, onClose, goal }: GoalSimulatorFormP
   );
 }
 
-const s = StyleSheet.create({
-  goalInfo: {
-    backgroundColor: colors.surfaceHigh, borderRadius: radius.button,
-    padding: spacing.md, borderWidth: 1, borderColor: colors.border,
-  },
-  goalName: { color: colors.text, fontSize: typography.size.lg, fontWeight: typography.weight.semibold },
-  goalStatsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md, marginTop: spacing.sm },
-  goalStat: { color: colors.muted, fontSize: typography.size.xs },
-  goalStatVal: { color: colors.text, fontWeight: typography.weight.semibold },
-  resultBox: {
-    backgroundColor: colors.surface, borderRadius: radius.button,
-    padding: spacing.md, borderWidth: 1, borderColor: colors.border,
-    gap: spacing.md,
-  },
-  resultTitle: { color: colors.text, fontSize: typography.size.md, fontWeight: typography.weight.semibold },
-  resultRow: { flexDirection: 'row', gap: spacing.md },
-  resultItem: { flex: 1, gap: 4 },
-  resultItemHeader: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  resultItemLabel: { color: colors.muted, fontSize: typography.size.xs },
-  resultItemVal: { color: colors.text, fontSize: typography.size.lg, fontWeight: typography.weight.bold, fontFamily: typography.fontFamily.mono },
-  resultItemUnit: { color: colors.muted, fontSize: typography.size.sm, fontWeight: typography.weight.regular },
-  divider: { height: 1, backgroundColor: colors.border },
-  savingBox: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-    backgroundColor: 'rgba(0, 230, 118, 0.12)',
-    borderRadius: radius.button, padding: spacing.md,
-    borderWidth: 1, borderColor: 'rgba(0, 230, 118, 0.3)',
-  },
-  savingText: { color: colors.success, fontSize: typography.size.sm, fontWeight: typography.weight.semibold, flex: 1 },
-  resultText: { color: colors.muted, fontSize: typography.size.sm },
-  btn: {
-    backgroundColor: colors.accent, paddingVertical: 14,
-    borderRadius: radius.button, alignItems: 'center', marginTop: spacing.md,
-  },
-  btnText: { color: colors.base, fontSize: typography.size.md, fontWeight: typography.weight.bold },
-});

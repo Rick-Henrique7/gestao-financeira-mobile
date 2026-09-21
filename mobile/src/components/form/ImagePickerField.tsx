@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { View, Text, Pressable, Image, ActivityIndicator, StyleSheet, Alert } from 'react-native';
+import { View, Text, Pressable, Image, ActivityIndicator, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { FileImage, X, Camera, FolderOpen } from 'lucide-react-native';
-import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useStyles, useTheme } from '../../lib/AppThemeProvider';
 import { createAttachment } from '../../services/attachments';
 import { generateId } from '../../db/database';
 
@@ -19,8 +19,38 @@ interface PickedImage {
 }
 
 export function ImagePickerField({ irRecordId, onPicked }: ImagePickerFieldProps) {
+  const { colors } = useTheme();
   const [picked, setPicked] = useState<PickedImage | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const s = useStyles((t) => ({
+    row: { flexDirection: 'row' as const, gap: t.spacing.sm },
+    btn: {
+      flex: 1, flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'center' as const,
+      gap: 6, backgroundColor: t.colors.accent, paddingVertical: 12,
+      borderRadius: t.radius.button,
+    },
+    btnText: { color: t.colors.textOnNeon, fontWeight: t.typography.weight.semibold, fontSize: t.typography.size.sm },
+    loader: { position: 'absolute' as const, right: 0, top: 16 },
+    previewBox: {
+      width: 120, height: 120, borderRadius: t.radius.button,
+      overflow: 'hidden' as const, backgroundColor: t.colors.surfaceHigh,
+      borderWidth: 1, borderColor: t.colors.border, position: 'relative' as const,
+    },
+    previewImg: { width: '100%' as const, height: '100%' as const },
+    removeBtn: {
+      position: 'absolute' as const, top: 4, right: 4,
+      width: 22, height: 22, borderRadius: 11,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      alignItems: 'center' as const, justifyContent: 'center' as const,
+    },
+    fileInfo: {
+      position: 'absolute' as const, bottom: 0, left: 0, right: 0,
+      flexDirection: 'row' as const, alignItems: 'center' as const, gap: 4,
+      backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 6, paddingVertical: 3,
+    },
+    fileName: { color: '#FFF', fontSize: 9, flex: 1 },
+  }));
 
   const pickFromGallery = async () => {
     setLoading(true);
@@ -146,32 +176,3 @@ export function ImagePickerField({ irRecordId, onPicked }: ImagePickerFieldProps
     </View>
   );
 }
-
-const s = StyleSheet.create({
-  row: { flexDirection: 'row', gap: spacing.sm },
-  btn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 6, backgroundColor: colors.accent, paddingVertical: 12,
-    borderRadius: radius.button,
-  },
-  btnText: { color: colors.textOnNeon, fontWeight: typography.weight.semibold, fontSize: typography.size.sm },
-  loader: { position: 'absolute', right: 0, top: 16 },
-  previewBox: {
-    width: 120, height: 120, borderRadius: radius.button,
-    overflow: 'hidden', backgroundColor: colors.surfaceHigh,
-    borderWidth: 1, borderColor: colors.border, position: 'relative',
-  },
-  previewImg: { width: '100%', height: '100%' },
-  removeBtn: {
-    position: 'absolute', top: 4, right: 4,
-    width: 22, height: 22, borderRadius: 11,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  fileInfo: {
-    position: 'absolute', bottom: 0, left: 0, right: 0,
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 6, paddingVertical: 3,
-  },
-  fileName: { color: '#FFF', fontSize: 9, flex: 1 },
-});

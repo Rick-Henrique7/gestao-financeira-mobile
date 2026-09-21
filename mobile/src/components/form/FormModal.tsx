@@ -3,14 +3,13 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
   Keyboard,
   TextInput as RNTextInput,
 } from 'react-native';
 import { X } from 'lucide-react-native';
-import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useStyles, useTheme } from '../../lib/AppThemeProvider';
 import { useReducedMotion, safeModalAnimation } from '../../lib/motion';
 import { FormScrollContext, type FormScrollApi } from './useInputScroll';
 
@@ -43,7 +42,42 @@ interface FormModalProps {
  */
 export function FormModal({ visible, title, onClose, children, error }: FormModalProps) {
   const reducedMotion = useReducedMotion();
+  const { colors } = useTheme();
   const scrollRef = useRef<ScrollView | null>(null);
+
+  const s = useStyles((t) => ({
+    fill: { flex: 1 },
+    overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' as const },
+    sheet: {
+      backgroundColor: t.colors.base,
+      borderTopLeftRadius: t.radius.display,
+      borderTopRightRadius: t.radius.display,
+      borderTopWidth: 1,
+      borderColor: t.colors.border,
+      maxHeight: '75%' as const,
+    },
+    handleWrap: { alignItems: 'center' as const, paddingTop: 8, paddingBottom: 4 },
+    handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: t.colors.muted },
+    header: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      paddingHorizontal: t.spacing.lg,
+      paddingVertical: t.spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: t.colors.border,
+    },
+    title: { color: t.colors.text, fontSize: t.typography.size.lg, fontWeight: t.typography.weight.semibold },
+    closeBtn: { padding: 4 },
+    body: { padding: t.spacing.lg, gap: t.spacing.md, paddingBottom: t.spacing.xxl },
+    errorBox: {
+      backgroundColor: 'rgba(248, 113, 113, 0.12)',
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(248, 113, 113, 0.3)',
+      padding: t.spacing.md,
+    },
+    errorText: { color: t.colors.danger, fontSize: t.typography.size.sm, fontWeight: t.typography.weight.medium },
+  }));
   const inputRefs = useRef<Map<string, React.RefObject<RNTextInput | View | null>>>(new Map());
   const lastFocusedKey = useRef<string | null>(null);
   const currentScrollY = useRef(0);
@@ -276,36 +310,3 @@ function InputWrapper({
   return React.cloneElement(element, props);
 }
 
-const s = StyleSheet.create({
-  fill: { flex: 1 },
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
-  sheet: {
-    backgroundColor: colors.base,
-    borderTopLeftRadius: radius.display,
-    borderTopRightRadius: radius.display,
-    borderTopWidth: 1,
-    borderColor: colors.border,
-    maxHeight: '75%',
-  },
-  handleWrap: { alignItems: 'center', paddingTop: 8, paddingBottom: 4 },
-  handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: colors.muted },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: { color: colors.text, fontSize: typography.size.lg, fontWeight: typography.weight.semibold },
-  closeBtn: { padding: 4 },
-  body: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xxl },
-  errorBox: {
-    backgroundColor: 'rgba(248, 113, 113, 0.12)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(248, 113, 113, 0.3)',
-    padding: spacing.md,
-  },
-  errorText: { color: colors.danger, fontSize: typography.size.sm, fontWeight: typography.weight.medium },
-});

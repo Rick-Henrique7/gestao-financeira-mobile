@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../../lib/theme';
+import { View, Text } from 'react-native';
+import { useStyles } from '../../lib/AppThemeProvider';
 
 // ─── FORM FIELD (label + children) ──────────────────────────────────────────
 
@@ -12,6 +12,16 @@ interface FormFieldProps {
 }
 
 export function FormField({ label, required, hint, children }: FormFieldProps) {
+  const s = useStyles((t) => ({
+    field: { gap: 6 },
+    label: {
+      color: t.colors.text,
+      fontSize: t.typography.size.sm,
+      fontWeight: t.typography.weight.semibold,
+    },
+    required: { color: t.colors.danger },
+    hint: { color: t.colors.muted, fontSize: t.typography.size.xs },
+  }));
   return (
     <View style={s.field}>
       <Text style={s.label}>
@@ -23,10 +33,3 @@ export function FormField({ label, required, hint, children }: FormFieldProps) {
     </View>
   );
 }
-
-const s = StyleSheet.create({
-  field: { gap: 6 },
-  label: { color: colors.text, fontSize: typography.size.sm, fontWeight: typography.weight.semibold },
-  required: { color: colors.danger },
-  hint: { color: colors.muted, fontSize: typography.size.xs },
-});

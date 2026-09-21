@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Pressable, Text, View, StyleSheet } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react-native';
 import { FormModal } from '../form/FormModal';
 import { FormField } from '../form/FormField';
 import { NumberInputField } from '../form/NumberInputField';
 import { DateInputField } from '../form/DateInputField';
 import { TextInputField } from '../form/TextInputField';
-import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useStyles, useTheme } from '../../lib/AppThemeProvider';
 import { useGoalsStore } from '../../stores/goalsStore';
 import { fmt } from '../../lib/format';
 import type { GoalDepositType, FinancialGoal } from '../../types';
@@ -23,6 +23,24 @@ const today = () => new Date().toISOString().slice(0, 10);
 export function GoalDepositForm({ visible, onClose, goal, type }: GoalDepositFormProps) {
   const deposit = useGoalsStore((s) => s.deposit);
   const withdraw = useGoalsStore((s) => s.withdraw);
+  const { colors } = useTheme();
+
+  const s = useStyles((t) => ({
+    goalInfo: {
+      backgroundColor: t.colors.surfaceHigh, borderRadius: t.radius.button,
+      padding: t.spacing.md, marginBottom: t.spacing.md,
+      borderWidth: 1, borderColor: t.colors.border,
+    },
+    goalName: { color: t.colors.text, fontSize: t.typography.size.lg, fontWeight: t.typography.weight.semibold },
+    goalBalance: { color: t.colors.muted, fontSize: t.typography.size.sm, marginTop: 2 },
+    goalBalanceVal: { color: t.colors.accent, fontWeight: t.typography.weight.semibold },
+    btn: {
+      flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'center' as const,
+      gap: t.spacing.sm, paddingVertical: 14, borderRadius: t.radius.button, marginTop: t.spacing.md,
+    },
+    btnDisabled: { opacity: 0.5 },
+    btnText: { color: t.colors.textOnNeon, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold },
+  }));
 
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(today());
@@ -113,18 +131,3 @@ export function GoalDepositForm({ visible, onClose, goal, type }: GoalDepositFor
   );
 }
 
-const s = StyleSheet.create({
-  goalInfo: {
-    backgroundColor: colors.surfaceHigh, borderRadius: radius.button,
-    padding: spacing.md, borderWidth: 1, borderColor: colors.border,
-  },
-  goalName: { color: colors.text, fontSize: typography.size.lg, fontWeight: typography.weight.semibold },
-  goalBalance: { color: colors.muted, fontSize: typography.size.sm, marginTop: 2 },
-  goalBalanceVal: { color: colors.accent, fontWeight: typography.weight.semibold },
-  btn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: spacing.sm, paddingVertical: 14, borderRadius: radius.button, marginTop: spacing.md,
-  },
-  btnDisabled: { opacity: 0.5 },
-  btnText: { color: colors.base, fontSize: typography.size.md, fontWeight: typography.weight.bold },
-});

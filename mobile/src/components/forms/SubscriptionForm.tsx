@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Pressable, Text, StyleSheet } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import { FormModal } from '../form/FormModal';
 import { FormField } from '../form/FormField';
 import { TextInputField } from '../form/TextInputField';
 import { NumberInputField } from '../form/NumberInputField';
 import { SelectField } from '../form/SelectField';
-import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useStyles } from '../../lib/AppThemeProvider';
 import { useSubsStore } from '../../stores/subscriptionsStore';
 import type { Subscription, SubscriptionStatus } from '../../types';
 
@@ -25,6 +25,15 @@ interface SubscriptionFormProps {
 export function SubscriptionForm({ visible, onClose, edit }: SubscriptionFormProps) {
   const add = useSubsStore((s) => s.add);
   const update = useSubsStore((s) => s.update);
+
+  const s = useStyles((t) => ({
+    btn: {
+      backgroundColor: t.colors.accent, paddingVertical: 14, borderRadius: t.radius.button,
+      alignItems: 'center' as const, marginTop: t.spacing.md,
+    },
+    btnDisabled: { opacity: 0.5 },
+    btnText: { color: t.colors.textOnNeon, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold },
+  }));
 
   const [serviceName, setServiceName] = useState('');
   const [monthlyCost, setMonthlyCost] = useState('');
@@ -131,12 +140,3 @@ export function SubscriptionForm({ visible, onClose, edit }: SubscriptionFormPro
     </FormModal>
   );
 }
-
-const s = StyleSheet.create({
-  btn: {
-    backgroundColor: colors.accent, paddingVertical: 14, borderRadius: radius.button,
-    alignItems: 'center', marginTop: spacing.md,
-  },
-  btnDisabled: { opacity: 0.5 },
-  btnText: { color: colors.textOnNeon, fontSize: typography.size.md, fontWeight: typography.weight.bold },
-});

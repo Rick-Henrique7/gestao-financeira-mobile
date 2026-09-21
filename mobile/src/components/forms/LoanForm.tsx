@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Pressable, Text, StyleSheet } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import { FormModal } from '../form/FormModal';
 import { FormField } from '../form/FormField';
 import { TextInputField } from '../form/TextInputField';
 import { NumberInputField } from '../form/NumberInputField';
 import { DateInputField } from '../form/DateInputField';
-import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useStyles } from '../../lib/AppThemeProvider';
 import { useLoansStore } from '../../stores/loansStore';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -17,6 +17,16 @@ const oneMonth = () => {
 
 export function LoanForm({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const add = useLoansStore((s) => s.add);
+
+  const s = useStyles((t) => ({
+    btn: {
+      backgroundColor: t.colors.accent, paddingVertical: 14, borderRadius: t.radius.button,
+      alignItems: 'center' as const, marginTop: t.spacing.md,
+    },
+    btnDisabled: { opacity: 0.5 },
+    btnText: { color: t.colors.textOnNeon, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold },
+  }));
+
   const [debtor, setDebtor] = useState('');
   const [amount, setAmount] = useState('');
   const [loanDate, setLoanDate] = useState(today());
@@ -79,11 +89,3 @@ export function LoanForm({ visible, onClose }: { visible: boolean; onClose: () =
   );
 }
 
-const s = StyleSheet.create({
-  btn: {
-    backgroundColor: colors.accent, paddingVertical: 14, borderRadius: radius.button,
-    alignItems: 'center', marginTop: spacing.md,
-  },
-  btnDisabled: { opacity: 0.5 },
-  btnText: { color: colors.textOnNeon, fontSize: typography.size.md, fontWeight: typography.weight.bold },
-});

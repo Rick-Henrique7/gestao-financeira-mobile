@@ -1,6 +1,6 @@
 import React from 'react';
-import { TextInput, StyleSheet } from 'react-native';
-import { colors, radius, spacing, typography } from '../../lib/theme';
+import { TextInput } from 'react-native';
+import { useStyles, useTheme } from '../../lib/AppThemeProvider';
 
 interface NumberInputFieldProps {
   value: string;
@@ -17,6 +17,22 @@ export function NumberInputField({
   invalid,
   allowDecimals = true,
 }: NumberInputFieldProps) {
+  const { colors } = useTheme();
+  const s = useStyles((t) => ({
+    input: {
+      backgroundColor: t.colors.surfaceHigh,
+      borderWidth: 1,
+      borderColor: t.colors.border,
+      borderRadius: t.radius.button,
+      paddingHorizontal: t.spacing.md,
+      paddingVertical: 14,
+      minHeight: 52,
+      color: t.colors.text,
+      fontSize: t.typography.size.lg,
+      fontFamily: t.typography.fontFamily.mono,
+    },
+    invalid: { borderColor: t.colors.danger },
+  }));
   return (
     <TextInput
       style={[s.input, invalid && s.invalid]}
@@ -33,19 +49,3 @@ export function NumberInputField({
     />
   );
 }
-
-const s = StyleSheet.create({
-  input: {
-    backgroundColor: colors.surfaceHigh,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.button,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 14,
-    minHeight: 52,
-    color: colors.text,
-    fontSize: typography.size.lg,
-    fontFamily: typography.fontFamily.mono,
-  },
-  invalid: { borderColor: colors.danger },
-});

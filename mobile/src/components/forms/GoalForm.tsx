@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, Text, View, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, Text, View, ScrollView } from 'react-native';
 import {
   Target, Plane, Car, Home, GraduationCap, Heart, Gift,
   Smartphone, ShoppingBag, Briefcase, Wallet, PiggyBank,
@@ -9,7 +9,7 @@ import { FormField } from '../form/FormField';
 import { TextInputField } from '../form/TextInputField';
 import { NumberInputField } from '../form/NumberInputField';
 import { DateInputField } from '../form/DateInputField';
-import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useStyles, useTheme } from '../../lib/AppThemeProvider';
 import { useGoalsStore } from '../../stores/goalsStore';
 
 const COLOR_CHOICES = [
@@ -40,6 +40,46 @@ const oneYearFromNow = () => {
 
 export function GoalForm({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const add = useGoalsStore((s) => s.add);
+  const { colors } = useTheme();
+
+  const s = useStyles((t) => ({
+    iconRow: { flexDirection: 'row' as const, gap: t.spacing.sm, paddingVertical: t.spacing.xs },
+    iconChip: {
+      width: 44, height: 44, borderRadius: t.radius.button,
+      backgroundColor: t.colors.surfaceHigh, alignItems: 'center' as const, justifyContent: 'center' as const,
+      borderWidth: 2, borderColor: t.colors.border,
+    },
+    iconChipActive: { borderColor: t.colors.accent },
+    colorRow: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 10, paddingVertical: 6 },
+    colorChip: {
+      width: 36, height: 36, borderRadius: 18,
+      borderWidth: 3, borderColor: 'transparent',
+    },
+    colorChipActive: { borderColor: t.colors.text },
+    colorDot: {
+      width: 36, height: 36, borderRadius: 18,
+      borderWidth: 2, borderColor: 'transparent',
+    },
+    colorDotSelected: { borderColor: t.colors.text },
+    iconScroll: { marginHorizontal: -t.spacing.lg, paddingHorizontal: t.spacing.lg },
+    iconItem: {
+      alignItems: 'center' as const, justifyContent: 'center' as const,
+      paddingHorizontal: t.spacing.md, paddingVertical: t.spacing.sm,
+      borderRadius: t.radius.button, backgroundColor: t.colors.surfaceHigh,
+      borderWidth: 1, borderColor: t.colors.border,
+      marginRight: t.spacing.sm, minWidth: 70,
+    },
+    iconItemSelected: { backgroundColor: t.colors.accent, borderColor: t.colors.accent },
+    iconLabel: { color: t.colors.text, fontSize: t.typography.size.xs, marginTop: 4 },
+    iconLabelSelected: { color: t.colors.base, fontWeight: t.typography.weight.semibold },
+    btn: {
+      backgroundColor: t.colors.accent, paddingVertical: 14, borderRadius: t.radius.button,
+      alignItems: 'center' as const, marginTop: t.spacing.md,
+    },
+    btnDisabled: { opacity: 0.5 },
+    btnText: { color: t.colors.textOnNeon, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold },
+  }));
+
   const [title, setTitle] = useState('');
   const [target, setTarget] = useState('');
   const [current, setCurrent] = useState('0');
@@ -148,28 +188,3 @@ export function GoalForm({ visible, onClose }: { visible: boolean; onClose: () =
   );
 }
 
-const s = StyleSheet.create({
-  colorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingVertical: 6 },
-  colorDot: {
-    width: 36, height: 36, borderRadius: 18,
-    borderWidth: 2, borderColor: 'transparent',
-  },
-  colorDotSelected: { borderColor: colors.text },
-  iconScroll: { marginHorizontal: -spacing.lg, paddingHorizontal: spacing.lg },
-  iconItem: {
-    alignItems: 'center', justifyContent: 'center',
-    paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
-    borderRadius: radius.button, backgroundColor: colors.surfaceHigh,
-    borderWidth: 1, borderColor: colors.border,
-    marginRight: spacing.sm, minWidth: 70,
-  },
-  iconItemSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
-  iconLabel: { color: colors.text, fontSize: typography.size.xs, marginTop: 4 },
-  iconLabelSelected: { color: colors.base, fontWeight: typography.weight.semibold },
-  btn: {
-    backgroundColor: colors.accent, paddingVertical: 14,
-    borderRadius: radius.button, alignItems: 'center', marginTop: spacing.md,
-  },
-  btnDisabled: { opacity: 0.5 },
-  btnText: { color: colors.base, fontSize: typography.size.md, fontWeight: typography.weight.bold },
-});

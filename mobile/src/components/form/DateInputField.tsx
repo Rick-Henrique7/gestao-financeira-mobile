@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { View, Text, Pressable, StyleSheet, TextInput } from 'react-native';
 import { Calendar } from 'lucide-react-native';
-import { colors, radius, spacing, typography } from '../../lib/theme';
+import { useStyles, useTheme } from '../../lib/AppThemeProvider';
+import { radius, spacing, typography } from '../../lib/theme';
 
 interface DateInputFieldProps {
   value: string;
@@ -21,6 +22,7 @@ export function DateInputField({
   placeholder = 'AAAA-MM-DD',
   label = 'Data',
 }: DateInputFieldProps) {
+  const { colors } = useTheme();
   const [touched, setTouched] = useState(false);
   const isValidFormat = !value || ISO_RE.test(value);
 
@@ -32,6 +34,24 @@ export function DateInputField({
   };
 
   const showError = !isValidFormat && (touched || value.length > 0);
+
+  const s = useStyles((t) => ({
+    wrap: {
+      backgroundColor: t.colors.surfaceHigh,
+      borderWidth: 1,
+      borderColor: t.colors.border,
+      borderRadius: t.radius.button,
+    },
+    invalid: { borderColor: t.colors.danger },
+    inputRow: { flexDirection: 'row' as const, alignItems: 'center' as const, paddingLeft: t.spacing.md, paddingRight: 12 },
+    input: {
+      paddingVertical: 10,
+      color: t.colors.text,
+      fontSize: t.typography.size.md,
+      fontFamily: t.typography.fontFamily.mono,
+    },
+    icon: { padding: 4 },
+  }));
 
   return (
     <View
@@ -61,17 +81,3 @@ export function DateInputField({
     </View>
   );
 }
-
-const s = StyleSheet.create({
-  wrap: {
-    backgroundColor: colors.surfaceHigh,
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.button,
-  },
-  invalid: { borderColor: colors.danger },
-  inputRow: { flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.md, paddingRight: 12 },
-  input: {
-    paddingVertical: 10, color: colors.text,
-    fontSize: typography.size.md, fontFamily: typography.fontFamily.mono,
-  },
-  icon: { padding: 4 },
-});

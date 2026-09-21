@@ -63,7 +63,7 @@ export default function IRPFTabScreen() {
     hint: { color: t.colors.textMuted, fontSize: 11, marginTop: t.spacing.xs, fontStyle: 'italic' as const },
   }));
 
-  const { records, categories, loading, refresh, refreshCategories, remove } = useIRPFStore();
+  const { records, categories, loading, refresh, refreshCategories, remove, attach, update } = useIRPFStore();
   const [activeTab, setActiveTab] = useState<string>('');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<IRPFRecord | null>(null);
@@ -106,6 +106,14 @@ export default function IRPFTabScreen() {
       ],
       { cancelable: true }
     );
+  };
+
+  const toggleStatus = (rec: IRPFRecord) => {
+    if (rec.status === 'ATTACHED') {
+      void update(rec.id, { status: 'PENDING' });
+    } else {
+      void attach(rec.id);
+    }
   };
 
   return (
@@ -175,11 +183,18 @@ export default function IRPFTabScreen() {
                       {fmt(r.gross_value)}{r.ticker ? ` · ${r.ticker}` : ''}
                     </Text>
                   </View>
-                  <View style={[s.pill, isAtt ? s.pillDone : s.pillPending]}>
+                  <Pressable
+                    onPress={(e) => { e.stopPropagation(); toggleStatus(r); }}
+                    style={[s.pill, isAtt ? s.pillDone : s.pillPending]}
+                    hitSlop={6}
+                    accessibilityRole="button"
+                    accessibilityLabel={isAtt ? 'Marcar como pendente' : 'Marcar como anexado'}
+                    accessibilityHint="Toque para alternar o status"
+                  >
                     <Text style={[s.pillText, isAtt ? s.pillTextDone : s.pillTextPending]}>
                       {isAtt ? 'Anexado' : 'Pendente'}
                     </Text>
-                  </View>
+                  </Pressable>
                   <Pressable
                     onPress={(e) => { e.stopPropagation(); confirmDelete(r); }}
                     style={s.rowActionBtnDanger}
@@ -192,7 +207,9 @@ export default function IRPFTabScreen() {
                 </Pressable>
               );
             })}
-            <Text style={s.hint}>Toque para editar · Lixeira para remover</Text>
+            <Text style={s.hint}>
+              Toque para editar · Pílula alterna anexado/pendente · Lixeira remove
+            </Text>
           </>
         )}
       </ScrollView>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Check } from 'lucide-react-native';
@@ -8,6 +8,17 @@ import { fmt } from '../../src/lib/format';
 import { FAB } from '../../src/components/form/FAB';
 import { BillForm } from '../../src/components/forms/BillForm';
 import { ScreenTitle } from '../../src/components/ScreenTitle';
+import type { Bill } from '../../src/types';
+
+type FilterKey = 'PENDING' | 'OVERDUE' | 'PAID' | 'ALL';
+type SortKey = 'DUE_DATE' | 'AMOUNT' | 'CATEGORY';
+
+const FILTER_TABS: Array<{ key: FilterKey; label: string }> = [
+  { key: 'PENDING', label: 'Pendentes' },
+  { key: 'OVERDUE', label: 'Vencidas' },
+  { key: 'PAID',    label: 'Pagas' },
+  { key: 'ALL',     label: 'Todas' },
+];
 
 export default function BillsScreen() {
   const { colors, typography } = useTheme();
@@ -43,10 +54,44 @@ export default function BillsScreen() {
     summaryLabel: { color: t.colors.textMuted, fontSize: t.typography.size.sm },
     summaryValue: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold, fontFamily: t.typography.fontFamily.mono },
     loading: { marginVertical: 16 },
+    // Filter chips
+    filterRow: {
+      flexDirection: 'row' as const, gap: t.spacing.sm,
+      paddingVertical: t.spacing.xs,
+    },
+    filterChip: {
+      paddingHorizontal: t.spacing.md, paddingVertical: t.spacing.sm,
+      borderRadius: t.radius.pill, backgroundColor: t.colors.surface,
+      borderWidth: 1, borderColor: t.colors.border,
+      flexDirection: 'row' as const, alignItems: 'center' as const, gap: 6,
+    },
+    filterChipActive: {
+      backgroundColor: t.colors.accent, borderColor: t.colors.accent,
+    },
+    filterChipText: { color: t.colors.textMuted, fontSize: t.typography.size.sm, fontWeight: t.typography.weight.semibold },
+    filterChipTextActive: { color: t.colors.textOnNeon },
+    filterChipCount: {
+      color: t.colors.textMuted, fontSize: 10, fontWeight: t.typography.weight.bold,
+      paddingHorizontal: 5, paddingVertical: 1,
+      borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.05)',
+      minWidth: 18, textAlign: 'center' as const,
+    },
+    filterChipCountActive: { color: t.colors.textOnNeon, backgroundColor: 'rgba(0,0,0,0.15)' },
+    sortRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: t.spacing.sm, marginTop: t.spacing.sm },
+    sortChip: {
+      paddingHorizontal: t.spacing.sm, paddingVertical: 4,
+      borderRadius: t.radius.pill, backgroundColor: t.colors.surfaceHigh,
+      borderWidth: 1, borderColor: t.colors.border,
+    },
+    sortChipActive: { backgroundColor: t.colors.surfaceHigh, borderColor: t.colors.accent },
+    sortChipText: { color: t.colors.textMuted, fontSize: t.typography.size.xs, fontWeight: t.typography.weight.semibold },
+    sortChipTextActive: { color: t.colors.accent },
   }));
 
   const { bills, loading, refresh, togglePaid, remove } = useBillsStore();
   const [formOpen, setFormOpen] = useState(false);
+  const [filter, setFilter] = useState<FilterKey>('PENDING');
+  const [sort, setSort] = useState<SortKey>('DUE_DATE');
 
   useEffect(() => { refresh(); }, [refresh]);
 
@@ -55,6 +100,27 @@ export default function BillsScreen() {
   const overdue  = bills.filter((b) => b.status === 'OVERDUE');
   const totalPending  = pending.reduce((acc, b) => acc + b.amount, 0);
   const totalPaid     = paid.reduce((acc, b) => acc + b.amount, 0);
+
+  // Filtragem + ordenacao
+  const filtered = useMemo(() => {
+    let arr: Bill[];
+    if (filter === 'ALL') arr = bills;
+    else arr = bills.filter((b) => b.status === filter);
+    arr = [...arr].sort((a, b) => {
+      if (sort === 'AMOUNT') return b.amount - a.amount;
+      if (sort === 'CATEGORY') return (a.category ?? 'z').localeCompare(b.category ?? 'z');
+      // default: due_date
+      return a.due_date.localeCompare(b.due_date);
+    });
+    return arr;
+  }, [bills, filter, sort]);
+
+  const countFor = (key: FilterKey): number => {
+    if (key === 'PENDING') return pending.length;
+    if (key === 'OVERDUE') return overdue.length;
+    if (key === 'PAID') return paid.length;
+    return bills.length;
+  };
 
   return (
     <SafeAreaView style={s.root} edges={['top', 'bottom']}>
@@ -67,72 +133,105 @@ export default function BillsScreen() {
         </View>
 
         <View style={s.display}>
-          <Text style={s.title}>Contas pendentes</Text>
+          <Text style={s.title}>Filtro</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow}>
+            {FILTER_TABS.map((f) => {
+              const active = filter === f.key;
+              const count = countFor(f.key);
+              return (
+                <Pressable
+                  key={f.key}
+                  onPress={() => setFilter(f.key)}
+                  style={[s.filterChip, active && s.filterChipActive]}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: active }}
+                  accessibilityLabel={`${f.label} (${count})`}
+                >
+                  <Text style={[s.filterChipText, active && s.filterChipTextActive]}>
+                    {f.label}
+                  </Text>
+                  <Text style={[s.filterChipCount, active && s.filterChipCountActive]}>
+                    {count}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+          <View style={s.sortRow}>
+            <Text style={s.sortChipText}>Ordenar por:</Text>
+            {(['DUE_DATE', 'AMOUNT', 'CATEGORY'] as SortKey[]).map((sKey) => {
+              const labels: Record<SortKey, string> = {
+                DUE_DATE: 'Vencimento',
+                AMOUNT: 'Valor',
+                CATEGORY: 'Categoria',
+              };
+              const active = sort === sKey;
+              return (
+                <Pressable
+                  key={sKey}
+                  onPress={() => setSort(sKey)}
+                  style={[s.sortChip, active && s.sortChipActive]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                >
+                  <Text style={[s.sortChipText, active && s.sortChipTextActive]}>
+                    {labels[sKey]}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        <View style={s.display}>
+          <Text style={s.title}>
+            {filter === 'ALL' ? 'Todas as contas' : `Contas ${FILTER_TABS.find(f => f.key === filter)?.label.toLowerCase()}`}
+          </Text>
           {loading && <ActivityIndicator color={colors.accent} style={s.loading} />}
-          {!loading && pending.length === 0 && (
-            <Text style={s.empty}>Nenhuma conta pendente</Text>
+          {!loading && filtered.length === 0 && (
+            <Text style={s.empty}>Nenhuma conta neste filtro</Text>
           )}
-          {pending.map((b) => (
+          {filtered.map((b) => (
             <Pressable
               key={b.id}
               onPress={() => togglePaid(b.id)}
-              onLongPress={() => remove(b.id)}
-              style={s.row}
+              onLongPress={() => {
+                Alert.alert(
+                  'Remover conta',
+                  `Deseja remover "${b.title}"? Esta acao nao pode ser desfeita.`,
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    { text: 'Remover', style: 'destructive', onPress: () => { void remove(b.id); } },
+                  ],
+                  { cancelable: true }
+                );
+              }}
+              style={[s.row, b.status === 'PAID' && s.rowDone]}
               accessibilityRole="button"
-              accessibilityLabel={`Marcar ${b.title} como paga`}
+              accessibilityLabel={`${b.status === 'PAID' ? 'Desmarcar' : 'Marcar'} ${b.title} como ${b.status === 'PAID' ? 'paga' : 'paga'}`}
               accessibilityHint="Toque longo para remover"
             >
-              <View style={s.checkbox} />
+              <View style={[s.checkbox, b.status === 'PAID' && s.checkboxDone]}>
+                {b.status === 'PAID' && <Check size={12} color={colors.textOnNeon} />}
+              </View>
               <View style={{ flex: 1 }}>
-                <Text style={s.billTitle}>{b.title}</Text>
+                <Text style={[s.billTitle, b.status === 'PAID' && s.strikethrough]}>
+                  {b.title}
+                </Text>
                 <Text style={s.billMeta}>
                   {b.category ?? 'Outros'} - vence {b.due_date.substring(8, 10)}/{b.due_date.substring(5, 7)}
                 </Text>
               </View>
-              <Text style={s.billAmount}>{fmt(b.amount)}</Text>
+              <Text style={[s.billAmount, b.status === 'PAID' && s.strikethrough]}>
+                {fmt(b.amount)}
+              </Text>
             </Pressable>
           ))}
         </View>
 
         {(paid.length > 0 || overdue.length > 0) && (
           <View style={s.display}>
-            <Text style={s.title}>Histórico</Text>
-            {[...paid, ...overdue].map((b) => (
-              <Pressable
-                key={b.id}
-                onPress={() => togglePaid(b.id)}
-                onLongPress={() => {
-                  Alert.alert(
-                    'Remover conta',
-                    `Deseja remover "${b.title}"? Esta acao nao pode ser desfeita.`,
-                    [
-                      { text: 'Cancelar', style: 'cancel' },
-                      { text: 'Remover', style: 'destructive', onPress: () => { void remove(b.id); } },
-                    ],
-                    { cancelable: true }
-                  );
-                }}
-                style={[s.row, b.status === 'PAID' && s.rowDone]}
-                accessibilityRole="button"
-                accessibilityLabel={`Desmarcar ${b.title} como paga`}
-                accessibilityHint="Toque longo para remover"
-              >
-                <View style={[s.checkbox, b.status === 'PAID' && s.checkboxDone]}>
-                  {b.status === 'PAID' && <Check size={12} color={colors.textOnNeon} />}
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[s.billTitle, b.status === 'PAID' && s.strikethrough]}>
-                    {b.title}
-                  </Text>
-                  <Text style={s.billMeta}>
-                    {b.status === 'PAID' ? 'Pago' : 'Vencido'} - {b.due_date.substring(0, 10)}
-                  </Text>
-                </View>
-                <Text style={[s.billAmount, b.status === 'PAID' && s.strikethrough]}>
-                  {fmt(b.amount)}
-                </Text>
-              </Pressable>
-            ))}
+            <Text style={s.title}>Resumo historico</Text>
             <View style={s.summaryRow}>
               <Text style={s.summaryLabel}>Total pago</Text>
               <Text style={s.summaryValue}>{fmt(totalPaid)}</Text>

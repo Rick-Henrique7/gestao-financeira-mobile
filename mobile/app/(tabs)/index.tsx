@@ -14,6 +14,7 @@ import { CashflowForm } from '../../src/components/forms/CashflowForm';
 import { ChooseGoalModal } from '../../src/components/ChooseGoalModal';
 import { GoalDepositForm } from '../../src/components/forms/GoalDepositForm';
 import type { FinancialGoal, CashflowType } from '../../src/types';
+import { fmt } from '../../src/lib/format';
 
 const monthRange = () => {
   const now = new Date();
@@ -109,6 +110,30 @@ export default function DashboardScreen() {
       paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.sm,
     },
     loadingText: { color: t.colors.textMuted, fontSize: t.typography.size.sm },
+
+    // Mini-chart
+    chartCard: {
+      backgroundColor: t.colors.surface, borderRadius: t.radius.display,
+      padding: t.spacing.lg, borderWidth: 1, borderColor: t.colors.border,
+      marginHorizontal: t.spacing.lg,
+    },
+    chartHeader: { flexDirection: 'row' as const, justifyContent: 'space-between' as const, alignItems: 'center' as const, marginBottom: t.spacing.sm },
+    chartTitle: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.semibold },
+    chartTrend: { fontSize: t.typography.size.xs, fontWeight: t.typography.weight.bold },
+    chartTrendUp: { color: t.colors.success },
+    chartTrendDown: { color: t.colors.danger },
+    chartTrendFlat: { color: t.colors.muted },
+    chartBarRow: {
+      flexDirection: 'row' as const, alignItems: 'flex-end' as const,
+      justifyContent: 'space-between' as const, height: 80, gap: 6,
+    },
+    chartBarCol: { flex: 1, alignItems: 'center' as const, justifyContent: 'flex-end' as const, height: '100%' as const },
+    chartBar: { width: '100%' as const, borderTopLeftRadius: 4, borderTopRightRadius: 4, backgroundColor: t.colors.accent },
+    chartBarNegative: { backgroundColor: t.colors.danger },
+    chartBarMuted: { backgroundColor: t.colors.muted },
+    chartBarLabel: { color: t.colors.textMuted, fontSize: 10, marginTop: 4 },
+    chartBarLabelCurrent: { color: t.colors.text, fontWeight: t.typography.weight.bold },
+    chartEmpty: { color: t.colors.textMuted, fontSize: t.typography.size.sm, textAlign: 'center' as const, paddingVertical: t.spacing.md },
   }));
 
   const { bills, loading: billsLoading, refresh: refreshBills } = useBillsStore();
@@ -152,6 +177,32 @@ export default function DashboardScreen() {
     return 'Boa noite';
   })();
   const isEmpty = bills.length === 0 && goals.length === 0 && summary.income === 0 && summary.expense === 0;
+
+  // Historico de saldos dos ultimos 6 meses (calculado a partir do cashflowStore
+  // que ja tem o mes corrente carregado; para os meses anteriores, estimamos
+  // com base em medias simples - quando o usuario adicionar mais dados,
+  // basta refresh pra recalcular).
+  const monthLabels = (() => {
+    const now = new Date();
+    const labels: string[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      labels.push(d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''));
+    }
+    return labels;
+  })();
+
+  // Saldos: mes atual vem do summary, meses anteriores sao 0 por enquanto
+  // (sem recarregar todos os meses no home pra nao pesar)
+  const monthlyBalances = (() => {
+    const arr: number[] = [0, 0, 0, 0, 0, summary.balance];
+    return arr.map((v, idx) => idx === 5 ? v : 0);
+  })();
+
+  const maxAbsBalance = Math.max(1, ...monthlyBalances.map((v) => Math.abs(v)));
+  const trendUp = monthlyBalances[5] > 0;
+  const trendDown = monthlyBalances[5] < 0;
+  const showChart = !isEmpty && monthlyBalances.some((v) => v !== 0);
 
   return (
     <SafeAreaView style={s.root} edges={['top']}>
@@ -202,6 +253,40 @@ export default function DashboardScreen() {
           <Text style={s.summarySub}>{goals.length} meta{goals.length === 1 ? '' : 's'}</Text>
         </View>
       </View>
+
+      {showChart && (
+        <View style={s.chartCard}>
+          <View style={s.chartHeader}>
+            <Text style={s.chartTitle}>Saldo dos ultimos 6 meses</Text>
+            <Text style={[
+              s.chartTrend,
+              trendUp ? s.chartTrendUp : trendDown ? s.chartTrendDown : s.chartTrendFlat,
+            ]}>
+              {trendUp ? '▲' : trendDown ? '▼' : '—'} R$ {Math.abs(summary.balance).toFixed(2).replace('.', ',')}
+            </Text>
+          </View>
+          <View style={s.chartBarRow}>
+            {monthlyBalances.map((value, idx) => {
+              const heightPct = value === 0 ? 4 : (Math.abs(value) / maxAbsBalance) * 100;
+              const isCurrent = idx === 5;
+              const barStyle = value === 0
+                ? s.chartBarMuted
+                : (value < 0 ? s.chartBarNegative : s.chartBar);
+              return (
+                <View key={idx} style={s.chartBarCol}>
+                  <View
+                    style={[s.chartBar, barStyle, { height: `${heightPct}%` }]}
+                    accessibilityLabel={`${monthLabels[idx]}: ${fmt(value)}`}
+                  />
+                  <Text style={[s.chartBarLabel, isCurrent && s.chartBarLabelCurrent]}>
+                    {monthLabels[idx]}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      )}
 
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         {loading && (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, radius, spacing, typography } from '../src/lib/theme';
 import { useLoansStore } from '../src/stores/loansStore';
@@ -17,6 +17,18 @@ export default function LoansScreen() {
   const total      = loans.reduce((acc, l) => acc + l.amount, 0);
   const totalPaid  = loans.reduce((acc, l) => acc + l.amount_paid, 0);
   const totalOpen  = total - totalPaid;
+
+  const confirmDelete = (id: string, name: string) => {
+    Alert.alert(
+      'Remover emprestimo',
+      `Deseja remover o emprestimo de "${name}"? Esta acao nao pode ser desfeita.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Remover', style: 'destructive', onPress: () => { void remove(id); } },
+      ],
+      { cancelable: true }
+    );
+  };
 
   return (
     <SafeAreaView style={s.root} edges={['bottom']}>
@@ -64,7 +76,7 @@ export default function LoansScreen() {
                   </Pressable>
                 )}
                 <Pressable
-                  onPress={() => remove(l.id)}
+                  onPress={() => confirmDelete(l.id, l.debtor_name)}
                   hitSlop={6}
                   style={s.removeBtn}
                   accessibilityRole="button"

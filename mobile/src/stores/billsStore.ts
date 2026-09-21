@@ -33,19 +33,14 @@ export const useBillsStore = create<BillsState>((set) => ({
 
   add: async (b) => {
     // NAO swallow error - re-throw pro BillForm.onSubmit pegar
-    console.log('[billsStore] add() chamado com:', JSON.stringify(b));
     await createBill(b);
-    console.log('[billsStore] add() createBill OK, listando...');
     const bills = await listBills();
-    console.log('[billsStore] add() listBills retornou', bills.length, 'bills');
     set({ bills, error: null });
   },
 
   togglePaid: async (id) => {
-    console.log('[billsStore] togglePaid() id =', id);
     await markBillPaid(id);
     const bills = await listBills();
-    console.log('[billsStore] togglePaid() bills:', bills.length);
     set({ bills, error: null });
   },
 

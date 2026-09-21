@@ -71,7 +71,7 @@ export function EditAccountModal({ visible, onClose, currentName, currentEmail }
           maxLength={80}
         />
       </FormField>
-      <FormField label="Email">
+      <FormField label="Email" hint="Opcional. Usado para informacoes da conta.">
         <TextInputField
           value={email}
           onChangeText={setEmail}

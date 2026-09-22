@@ -97,7 +97,7 @@ export default function LoansScreen() {
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: 'transparent' },
+  root: { flex: 1, backgroundColor: colors.base },
   scroll: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 100, gap: spacing.md },
   display: {
     backgroundColor: colors.surface, borderRadius: radius.display,

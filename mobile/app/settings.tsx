@@ -267,7 +267,7 @@ function AboutModal({ visible, onClose }: { visible: boolean; onClose: () => voi
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: 'transparent' },
+  root: { flex: 1, backgroundColor: colors.base },
   scroll: { paddingTop: 8, paddingBottom: spacing.xxl, gap: spacing.md },
   section: { paddingHorizontal: spacing.lg, gap: spacing.sm },
   sectionTitle: {

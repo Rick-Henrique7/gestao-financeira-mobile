@@ -46,7 +46,7 @@ export default function DashboardScreen() {
   const { colors } = useTheme();
 
   const s = useStyles((t) => ({
-    root: { flex: 1, backgroundColor: 'transparent' },
+    root: { flex: 1, backgroundColor: t.colors.bgCanvas },
 
     // ── HERO (Figma: card verde-limão com dobra inferior arredondada) ──
     hero: {

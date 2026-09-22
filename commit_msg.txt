@@ -1,34 +1,32 @@
-fix(bg): ShapeGrid reescrito em Reanimated (sem Skia)
+revert: remove ShapeGrid e restaura backgrounds opacos
 
-Skia 1.x quebra com React 19 / RN 0.83:
-- 1.9.1: 'Cannot access play before initialization' (TDZ)
-- 1.5.7: 'Cannot read properties of undefined (reading ReactCurrentOwner)'
+Reverte as mudancas de background dos commits 0258d55, 2d4e463 e 36d71b4.
+ShapeGrid nao funcionou bem:
+- Skia: incompatibilidade com React 19 / RN 0.83 (varias versoes tentadas)
+- Versao Reanimated: vinhette chapada cobriu o canvas, deixando a Home
+  em fundo branco com ShapeGrid invisivel (feedback do usuario)
 
-Skia 1.x oficialmente suporta ate RN 0.75. Skia 2.x (que suporta RN 0.83)
-ainda nao foi lancado. Reverter para Reanimated puro.
-
-MUDANCAS
-- Removido @shopify/react-native-skia (desinstalado)
-- src/components/ShapeGrid.tsx: reescrito com View + transform animado
-  - Linhas verticais/horizontais: <View> 1px com backgroundColor hero+alpha
-  - Movimento diagonal: useSharedValue + withRepeat(withTiming, -1)
-  - Vinhette: View absoluto com borderRadius alto + opacity (dark=black,
-    light=white) - nao fica perfeito como Skia, mas quebra o galho
-  - Reanimated 4: Animated.View via import default
-- package.json version 0.6.1 -> 0.6.2
+MUDANCAS (reversao)
+- app/_layout.tsx: removido import ShapeGrid, contentStyle volta para
+  theme.colors.base (opaco)
+- app/(tabs)/_layout.tsx: tab bar volta para backgroundColor colors.bgCanvas
+  opaco (sem rgba)
+- 10 telas com root.backgroundColor revertido de 'transparent' para
+  colors.base/bgCanvas:
+  * app/(tabs)/index.tsx, contas.tsx, orcamento.tsx, assinaturas.tsx,
+    irpf.tsx
+  * app/export.tsx, loans.tsx, goals.tsx, simulacoes.tsx, settings.tsx
 
 MANTIDO
-- Plugue no _layout.tsx (ShapeGrid primeiro filho)
-- 10 telas com backgroundColor transparent (ja estavam)
-- Tab bar com rgba(0,0,0,0.85) (ja estava)
-- Props squareSize, speed, borderOpacity, animated (mesma API)
+- src/components/ShapeGrid.tsx (arquivo existe, mas nao e importado
+  em lugar nenhum - fica como codigo morto caso queira reativar
+  com ajustes futuros)
+- Design Figma (commit 7ed6e38) - hero verde-limao, paleta, tipografia
+- Onboarding (commit 1cbd562)
+- Theme.ts refactor (darkColors/lightColors com palette Figma)
 
 VERIFICACOES
 - tsc --noEmit: 0 erros
-- Funciona em Expo Go (sem modulo nativo extra)
+- App volta a funcionar como antes do experimento ShapeGrid
 
-NOTA SOBRE PERFORMANCE
-- ~25 linhas verticais + ~50 horizontais em uma tela 360x800
-- Total ~150 Views animadas (container) com transform: ok em RN
-- Muito mais leve que Skia + renderizacao de paths
-- 60fps mantido via Reanimated worklets
+Versao 0.6.2 -> 0.6.3

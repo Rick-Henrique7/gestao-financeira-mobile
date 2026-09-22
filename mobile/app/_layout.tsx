@@ -5,7 +5,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { View } from 'react-native';
 import { DrawerMenu } from '../src/components/DrawerMenu';
 import { OnboardingModal } from '../src/components/OnboardingModal';
-import { ShapeGrid } from '../src/components/ShapeGrid';
 import { useBillsStore } from '../src/stores/billsStore';
 import { useLoansStore } from '../src/stores/loansStore';
 import { useGoalsStore } from '../src/stores/goalsStore';
@@ -28,8 +27,7 @@ function ThemedNavigator() {
     headerStyle: { backgroundColor: theme.colors.base },
     headerTintColor: theme.colors.text,
     headerTitleStyle: { fontWeight: '600' as const },
-    // contentStyle transparente -> ShapeGrid fica visivel atras da tela
-    contentStyle: { backgroundColor: 'transparent' },
+    contentStyle: { backgroundColor: theme.colors.base },
   }), [theme]);
   return (
     <Stack screenOptions={screenOptions}>
@@ -73,9 +71,6 @@ export default function RootLayout() {
     <AppThemeProvider>
       <SafeAreaProvider>
         <View style={{ flex: 1 }}>
-          {/* ShapeGrid global: fica ATRAS de tudo (position absolute, primeiro filho).
-              pointerEvents="none" deixa toques atravessarem para o conteudo. */}
-          <ShapeGrid squareSize={48} speed={0.4} borderOpacity={0.18} />
           <ThemedStatusBar />
           <ThemedNavigator />
           <OnboardingModal />

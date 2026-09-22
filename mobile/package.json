@@ -1,6 +1,6 @@
 {
   "name": "sgf-mobile",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "main": "index.ts",
   "private": true,
   "scripts": {
@@ -12,7 +12,6 @@
   "dependencies": {
     "@expo/metro-runtime": "~55.0.12",
     "@expo/vector-icons": "^15.0.0",
-    "@shopify/react-native-skia": "^1.5.7",
     "expo": "~55.0.29",
     "expo-constants": "~55.0.17",
     "expo-file-system": "~55.0.25",

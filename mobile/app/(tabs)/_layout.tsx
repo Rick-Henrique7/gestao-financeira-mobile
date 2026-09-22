@@ -11,7 +11,9 @@ export default function TabsLayout() {
         headerShown: false,
         // Tab bar no padrão Figma: fundo preto, item ativo verde-limão
         tabBarStyle: {
-          backgroundColor: colors.bgCanvas,
+          // Fundo com leve transparencia para deixar o ShapeGrid aparecer atras.
+          // O tab bar continua legivel porque o conteudo da tab usa surface opaco.
+          backgroundColor: 'rgba(0,0,0,0.85)',
           borderTopColor: 'rgba(255,255,255,0.06)',
           borderTopWidth: 1,
           height: 72,

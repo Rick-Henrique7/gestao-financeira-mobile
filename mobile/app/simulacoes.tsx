@@ -231,7 +231,7 @@ export default function SimulacoesScreen() {
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.base },
+  root: { flex: 1, backgroundColor: 'transparent' },
   scroll: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: spacing.xxl, gap: spacing.md },
   display: {
     backgroundColor: colors.surface, borderRadius: radius.display,

@@ -1,57 +1,44 @@
-feat(design): aplica visual do Finance Management UI Kit (Figma)
+feat(bg): ShapeGrid global em Skia (verde-limao do kit)
 
-Refactor visual baseado no kit 'Finance Management Mobile App UI UX Kit'
-(2 imagens JPEG exportadas pelo usuário em Downloads/finance*.jpeg).
+Adiciona background animado global atras de todas as telas,
+usando porta em react-native-skia do componente ShapeGrid do React Bits.
 
-PALETA (theme.ts)
-- bgCanvas: #000000 (canvas preto puro)
-- hero: #D4F542 (verde-limao saturado - identidade do hero)
-- heroText: #000000 (tudo dentro do hero e preto)
-- surface: #161616 (cards no canvas)
-- text: #FFFFFF / textMuted: #7C7C7C
-- pos: #26D07C (verde de sucesso) / neg: #FF4D4D (vermelho)
-- tabActive: #D4F542 / tabInactive: #5C5C5C
-- Aliases mantidos (accent, accentBright, accentSoft, bgCanvas, etc.)
-  apontam pros novos valores - codigo legado continua compilando
+COMPONENTE (src/components/ShapeGrid.tsx)
+- Canvas Skia 60fps com malha de linhas (verticais + horizontais)
+- Cor das linhas: verde-limao do tema (colors.hero) com opacidade 0.18
+- Animacao diagonal lenta via useSharedValue + withRepeat(withTiming)
+- Vignette radial sutil no centro para nao competir com o conteudo
+- pointerEvents="none" -> toques atravessam para o conteudo
+- Respeita light/dark (vignette branca no light, preta no dark)
+- Props configuraveis: squareSize, speed, borderOpacity, vignetteRadius
 
-TIPOGRAFIA
-- Sem fontFamily mono por padrao (Figma usa sans-serif com peso black)
-- weight.black agora e a referencia (titulos e valores grandes)
-- letterSpacing.tight (-1) para valores hero
-- size.hero = 40 (valor do saldo)
+PLUGUE NO ROOT (app/_layout.tsx)
+- ShapeGrid e o PRIMEIRO filho do View raiz, garantindo que fica
+  atras de tudo via empilhamento natural (depois vem navigator/header)
+- contentStyle do Stack agora transparente para nao esconder o grid
 
-HOME (app/(tabs)/index.tsx) - refatorada seguindo o kit
-- Hero verde-limao com dobra inferior arredondada (borderBottomRadius 36)
-- Header: avatar preto circular (iniciais) + nome + @handle + icones
-  trofeu/sino em botoes pretos circulares
-- Label 'Saldo total' + valor grande em preto + botao olho (show/hide)
-- Pill de tendencia: icone seta + texto em verde-limao sobre pill preta
-- 4 botoes de acao pretos (quadrados 56x56, raio 20) com icone verde-limao:
-  Receita / Despesa / Conta / Cofrinho - mapeados pras acoes existentes
-- Banner 'X contas pendentes no app' com chevron (presente na 2a imagem)
-- Lista de 'Movimentacoes' usando bills pagas + cofrinhos do app real
-- Mini-chart de 6 meses mantido
+TELAS AJUSTADAS
+- root backgroundColor de 6 telas -> 'transparent':
+  * Home, Contas, Orcamento, Assinaturas, IRPF, Export
+- 4 telas legadas (loans, goals, simulacoes, settings) mesmo ajuste
+- Tab bar: bg opaco -> rgba(0,0,0,0.85) (deixa grid aparecer atras,
+  mas mantem contraste dos itens)
 
-TAB BAR (app/(tabs)/_layout.tsx)
-- Fundo preto, separador sutil (rgba white 0.06)
-- Tab ativa verde-limao (#D4F542), inativa cinza
-- strokeWidth 2 nos icones (mais clean, padrao Figma)
-- Altura 72, paddingBottom 10 (categoria iOS-like)
+DEPENDENCIAS
+- @shopify/react-native-skia@1.9.1 adicionada (~5 pacotes)
+- Versao 0.5.0 -> 0.6.0
 
-OUTROS AJUSTES
-- accounts tab: removido fontFamily mono do bigValue/billAmount
-- FormModal/QuickEntryModal/ChooseGoalModal: sheet agora usa
-  colors.surface (#161616) em vez de colors.base, pra contrastar
-  contra o overlay escuro
-- export.tsx (PDF): header de tabela usa #D4F542 (consistente com kit)
+ATENCAO SOBRE EXPO GO
+- Skia e modulo NATIVO. Em Expo Go puro, nao vai funcionar
+  (vai lancar "Cannot find native module").
+- Para rodar e necessario:
+  1) `npx expo prebuild --clean --platform android`
+  2) Rebuild do APK ou `eas build --profile development`
+  3) Instalar o development build no Android
+- Alternativa se preferir: substituir por View+Reanimated (sem Skia)
 
 MANUTENCAO
-- ThemeColors union type continua valido; aliases garantem back-compat
-- TypeScript: 0 erros (tsc --noEmit)
-- Versao bumpara 0.4.0 -> 0.5.0
-
-NOTA SOBRE ESCOPO: o kit so tem a Home como referencia visual.
-As outras telas (Contas, Orcamento, Assinaturas, IRPF, modais,
-drawer) seguem a mesma IDENTIDADE (paleta + tipografia + raios +
-padroes de surface) extraida da Home, mas o LAYOUT especifico de cada
-uma nao foi extraido do kit (fonte nao disponivel).
+- tsc --noEmit: 0 erros
+- ThemeColors union type preservado
+- Codigo novo isolado em src/components/ShapeGrid.tsx (pode ser
+  removido facilmente se nao funcionar)

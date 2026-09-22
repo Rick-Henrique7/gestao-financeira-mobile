@@ -82,7 +82,7 @@ export default function ExportScreen() {
   const [busy, setBusy] = useState<ExportFormat | null>(null);
 
   const s = useStyles((t) => ({
-    root: { flex: 1, backgroundColor: t.colors.base },
+    root: { flex: 1, backgroundColor: 'transparent' },
     scroll: { paddingHorizontal: t.spacing.lg, paddingBottom: 80, gap: t.spacing.md },
     intro: {
       color: t.colors.textMuted, fontSize: t.typography.size.sm,

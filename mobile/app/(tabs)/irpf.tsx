@@ -14,7 +14,7 @@ export default function IRPFTabScreen() {
   const { colors } = useTheme();
 
   const s = useStyles((t) => ({
-    root: { flex: 1, backgroundColor: t.colors.base },
+    root: { flex: 1, backgroundColor: 'transparent' },
     scroll: { paddingHorizontal: t.spacing.lg, paddingBottom: 100, gap: t.spacing.md },
     display: {
       backgroundColor: t.colors.surface, borderRadius: t.radius.display,

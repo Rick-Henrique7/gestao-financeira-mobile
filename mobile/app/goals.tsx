@@ -287,7 +287,7 @@ function GoalCard({
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.base },
+  root: { flex: 1, backgroundColor: 'transparent' },
   scroll: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 100, gap: spacing.md },
   header: { gap: 4, marginBottom: spacing.sm },
   h1: { color: colors.text, fontSize: typography.size.xl, fontWeight: typography.weight.semibold },

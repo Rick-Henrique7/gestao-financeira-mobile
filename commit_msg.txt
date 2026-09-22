@@ -1,0 +1,57 @@
+feat(design): aplica visual do Finance Management UI Kit (Figma)
+
+Refactor visual baseado no kit 'Finance Management Mobile App UI UX Kit'
+(2 imagens JPEG exportadas pelo usuário em Downloads/finance*.jpeg).
+
+PALETA (theme.ts)
+- bgCanvas: #000000 (canvas preto puro)
+- hero: #D4F542 (verde-limao saturado - identidade do hero)
+- heroText: #000000 (tudo dentro do hero e preto)
+- surface: #161616 (cards no canvas)
+- text: #FFFFFF / textMuted: #7C7C7C
+- pos: #26D07C (verde de sucesso) / neg: #FF4D4D (vermelho)
+- tabActive: #D4F542 / tabInactive: #5C5C5C
+- Aliases mantidos (accent, accentBright, accentSoft, bgCanvas, etc.)
+  apontam pros novos valores - codigo legado continua compilando
+
+TIPOGRAFIA
+- Sem fontFamily mono por padrao (Figma usa sans-serif com peso black)
+- weight.black agora e a referencia (titulos e valores grandes)
+- letterSpacing.tight (-1) para valores hero
+- size.hero = 40 (valor do saldo)
+
+HOME (app/(tabs)/index.tsx) - refatorada seguindo o kit
+- Hero verde-limao com dobra inferior arredondada (borderBottomRadius 36)
+- Header: avatar preto circular (iniciais) + nome + @handle + icones
+  trofeu/sino em botoes pretos circulares
+- Label 'Saldo total' + valor grande em preto + botao olho (show/hide)
+- Pill de tendencia: icone seta + texto em verde-limao sobre pill preta
+- 4 botoes de acao pretos (quadrados 56x56, raio 20) com icone verde-limao:
+  Receita / Despesa / Conta / Cofrinho - mapeados pras acoes existentes
+- Banner 'X contas pendentes no app' com chevron (presente na 2a imagem)
+- Lista de 'Movimentacoes' usando bills pagas + cofrinhos do app real
+- Mini-chart de 6 meses mantido
+
+TAB BAR (app/(tabs)/_layout.tsx)
+- Fundo preto, separador sutil (rgba white 0.06)
+- Tab ativa verde-limao (#D4F542), inativa cinza
+- strokeWidth 2 nos icones (mais clean, padrao Figma)
+- Altura 72, paddingBottom 10 (categoria iOS-like)
+
+OUTROS AJUSTES
+- accounts tab: removido fontFamily mono do bigValue/billAmount
+- FormModal/QuickEntryModal/ChooseGoalModal: sheet agora usa
+  colors.surface (#161616) em vez de colors.base, pra contrastar
+  contra o overlay escuro
+- export.tsx (PDF): header de tabela usa #D4F542 (consistente com kit)
+
+MANUTENCAO
+- ThemeColors union type continua valido; aliases garantem back-compat
+- TypeScript: 0 erros (tsc --noEmit)
+- Versao bumpara 0.4.0 -> 0.5.0
+
+NOTA SOBRE ESCOPO: o kit so tem a Home como referencia visual.
+As outras telas (Contas, Orcamento, Assinaturas, IRPF, modais,
+drawer) seguem a mesma IDENTIDADE (paleta + tipografia + raios +
+padroes de surface) extraida da Home, mas o LAYOUT especifico de cada
+uma nao foi extraido do kit (fonte nao disponivel).

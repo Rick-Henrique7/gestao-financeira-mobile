@@ -31,7 +31,7 @@ export default function BillsScreen() {
       padding: t.spacing.lg, borderWidth: 1, borderColor: t.colors.border,
     },
     label: { color: t.colors.textMuted, fontSize: t.typography.size.xs, textTransform: 'uppercase' as const, letterSpacing: 1.5, fontWeight: t.typography.weight.semibold },
-    bigValue: { fontSize: 36, fontWeight: t.typography.weight.bold, fontFamily: t.typography.fontFamily.mono, marginTop: t.spacing.xs },
+    bigValue: { fontSize: 32, fontWeight: t.typography.weight.black, letterSpacing: t.typography.letterSpacing.tight, marginTop: t.spacing.xs },
     sub: { color: t.colors.textMuted, fontSize: t.typography.size.sm, marginTop: t.spacing.xs },
     title: { color: t.colors.text, fontSize: t.typography.size.lg, fontWeight: t.typography.weight.semibold, marginBottom: t.spacing.md },
     empty: { color: t.colors.textMuted, fontSize: t.typography.size.md, textAlign: 'center' as const, paddingVertical: t.spacing.lg },
@@ -49,10 +49,10 @@ export default function BillsScreen() {
     strikethrough: { textDecorationLine: 'line-through' as const },
     billTitle: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.medium },
     billMeta: { color: t.colors.textMuted, fontSize: t.typography.size.sm, marginTop: 2 },
-    billAmount: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.semibold, fontFamily: t.typography.fontFamily.mono },
+    billAmount: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.semibold },
     summaryRow: { flexDirection: 'row' as const, justifyContent: 'space-between' as const, paddingTop: t.spacing.md },
     summaryLabel: { color: t.colors.textMuted, fontSize: t.typography.size.sm },
-    summaryValue: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold, fontFamily: t.typography.fontFamily.mono },
+    summaryValue: { color: t.colors.text, fontSize: t.typography.size.md, fontWeight: t.typography.weight.bold },
     loading: { marginVertical: 16 },
     // Filter chips
     filterRow: {

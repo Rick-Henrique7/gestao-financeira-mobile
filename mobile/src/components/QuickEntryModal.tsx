@@ -105,7 +105,7 @@ export function QuickEntryModal({ visible, onClose, onSelect }: QuickEntryModalP
 const s = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: colors.base,
+    backgroundColor: colors.surface,
     borderTopLeftRadius: radius.display, borderTopRightRadius: radius.display,
     borderTopWidth: 1, borderColor: colors.border, maxHeight: '80%',
   },

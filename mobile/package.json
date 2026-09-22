@@ -1,6 +1,6 @@
 {
   "name": "sgf-mobile",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "main": "index.ts",
   "private": true,
   "scripts": {

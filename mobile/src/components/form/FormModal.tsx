@@ -49,7 +49,7 @@ export function FormModal({ visible, title, onClose, children, error }: FormModa
     fill: { flex: 1 },
     overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' as const },
     sheet: {
-      backgroundColor: t.colors.base,
+      backgroundColor: t.colors.surface,
       borderTopLeftRadius: t.radius.display,
       borderTopRightRadius: t.radius.display,
       borderTopWidth: 1,

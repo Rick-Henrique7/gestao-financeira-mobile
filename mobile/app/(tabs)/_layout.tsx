@@ -9,36 +9,41 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        // Tab bar no padrão Figma: fundo preto, item ativo verde-limão
         tabBarStyle: {
           backgroundColor: colors.bgCanvas,
-          borderTopColor: 'rgba(204, 240, 80, 0.1)',
-          height: 68, paddingBottom: 8, paddingTop: 8,
-          marginBottom: 12,
+          borderTopColor: 'rgba(255,255,255,0.06)',
+          borderTopWidth: 1,
+          height: 72,
+          paddingBottom: 10,
+          paddingTop: 8,
+          elevation: 0,
         },
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '500' },
+        tabBarActiveTintColor: colors.hero,
+        tabBarInactiveTintColor: colors.tabInactive,
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
+        tabBarIconStyle: { marginTop: 2 },
       }}
     >
       <Tabs.Screen name="index" options={{
         title: 'Início',
-        tabBarIcon: ({ color, size }) => <LayoutDashboard size={size} color={color} />,
+        tabBarIcon: ({ color, size }) => <LayoutDashboard size={size} color={color} strokeWidth={2} />,
       }} />
       <Tabs.Screen name="contas" options={{
         title: 'Contas',
-        tabBarIcon: ({ color, size }) => <Receipt size={size} color={color} />,
+        tabBarIcon: ({ color, size }) => <Receipt size={size} color={color} strokeWidth={2} />,
       }} />
       <Tabs.Screen name="orcamento" options={{
         title: 'Orçamento',
-        tabBarIcon: ({ color, size }) => <BarChart2 size={size} color={color} />,
+        tabBarIcon: ({ color, size }) => <BarChart2 size={size} color={color} strokeWidth={2} />,
       }} />
       <Tabs.Screen name="assinaturas" options={{
         title: 'Assinaturas',
-        tabBarIcon: ({ color, size }) => <Tv size={size} color={color} />,
+        tabBarIcon: ({ color, size }) => <Tv size={size} color={color} strokeWidth={2} />,
       }} />
       <Tabs.Screen name="irpf" options={{
         title: 'IRPF',
-        tabBarIcon: ({ color, size }) => <FileText size={size} color={color} />,
+        tabBarIcon: ({ color, size }) => <FileText size={size} color={color} strokeWidth={2} />,
       }} />
     </Tabs>
   );

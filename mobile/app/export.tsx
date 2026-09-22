@@ -42,10 +42,10 @@ function toCSV(headers: string[], rows: Array<Array<string | number | null | und
 function buildHtml(title: string, sections: Array<{ name: string; headers: string[]; rows: any[][] }>): string {
   const today = new Date().toISOString().slice(0, 10);
   const body = sections.map((sec) => `
-    <h2 style="color:#0A0D0A;margin:24px 0 8px;">${sec.name}</h2>
+    <h2 style="color:#000000;margin:24px 0 8px;">${sec.name}</h2>
     <table style="width:100%;border-collapse:collapse;font-size:12px;">
       <thead>
-        <tr style="background:#CCF050;color:#000;">
+        <tr style="background:#D4F542;color:#000;">
           ${sec.headers.map((h) => `<th style="padding:6px 8px;text-align:left;border:1px solid #ccc;">${h}</th>`).join('')}
         </tr>
       </thead>
@@ -64,7 +64,7 @@ function buildHtml(title: string, sections: Array<{ name: string; headers: strin
   <meta charset="utf-8" />
   <title>${title}</title>
   <style>
-    body { font-family: -apple-system, sans-serif; padding: 24px; color: #0A0D0A; }
+    body { font-family: -apple-system, sans-serif; padding: 24px; color: #000000; }
     h1 { font-size: 22px; margin: 0 0 4px; }
     .meta { color: #5A6959; font-size: 12px; margin-bottom: 16px; }
   </style>

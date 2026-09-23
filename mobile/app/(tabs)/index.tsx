@@ -3,8 +3,9 @@ import {
   View, Text, ScrollView, ActivityIndicator, Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import {
-  Wallet, ChevronRight, Plus, Trophy, Bell, Eye, EyeOff,
+  Wallet, ChevronRight, Plus, Settings as SettingsIcon, Bell, Eye, EyeOff,
   ArrowUpRight, ArrowDownLeft, CreditCard, ArrowDownToLine,
   TrendingUp,
 } from 'lucide-react-native';
@@ -17,6 +18,7 @@ import { QuickEntryModal, type QuickEntryAction } from '../../src/components/Qui
 import { CashflowForm } from '../../src/components/forms/CashflowForm';
 import { ChooseGoalModal } from '../../src/components/ChooseGoalModal';
 import { GoalDepositForm } from '../../src/components/forms/GoalDepositForm';
+import { NotificationsModal } from '../../src/components/NotificationsModal';
 import type { FinancialGoal, CashflowType } from '../../src/types';
 import { fmt } from '../../src/lib/format';
 
@@ -322,11 +324,13 @@ export default function DashboardScreen() {
     refreshCashflow(start, end);
   }, [refreshBills, refreshSettings, refreshGoals, refreshCashflow]);
 
+  const router = useRouter();
   const [quickOpen, setQuickOpen] = useState(false);
   const [cashflowType, setCashflowType] = useState<CashflowType | null>(null);
   const [chooseGoalOpen, setChooseGoalOpen] = useState(false);
   const [depositCtx, setDepositCtx] = useState<{ goal: FinancialGoal; type: 'DEPOSIT' | 'WITHDRAWAL' } | null>(null);
   const [showBalance, setShowBalance] = useState(true);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   // Mapeamento dos 4 botões do hero → comportamento existente do app
   const onHeroAction = (key: QuickActionKey) => {
@@ -439,19 +443,19 @@ export default function DashboardScreen() {
           <View style={s.heroIcons}>
             <Pressable
               style={s.heroIconBtn}
-              onPress={() => {/* placeholder - sem tela de conquistas ainda */}}
-              accessibilityRole="button"
-              accessibilityLabel="Conquistas"
-            >
-              <Trophy size={18} color={colors.hero} strokeWidth={2.2} />
-            </Pressable>
-            <Pressable
-              style={s.heroIconBtn}
-              onPress={() => {/* placeholder - sem notificacoes ainda */}}
+              onPress={() => setNotificationsOpen(true)}
               accessibilityRole="button"
               accessibilityLabel="Notificacoes"
             >
               <Bell size={18} color={colors.hero} strokeWidth={2.2} />
+            </Pressable>
+            <Pressable
+              style={s.heroIconBtn}
+              onPress={() => router.push('/settings')}
+              accessibilityRole="button"
+              accessibilityLabel="Configuracoes"
+            >
+              <SettingsIcon size={18} color={colors.hero} strokeWidth={2.2} />
             </Pressable>
           </View>
         </View>
@@ -632,6 +636,7 @@ export default function DashboardScreen() {
       {depositCtx && (
         <GoalDepositForm visible={true} goal={depositCtx.goal} type={depositCtx.type} onClose={() => setDepositCtx(null)} />
       )}
+      <NotificationsModal visible={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
     </SafeAreaView>
   );
 }

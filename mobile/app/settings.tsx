@@ -23,9 +23,11 @@ interface SettingsEntry {
   label: string;
   sub: string;
   Icon: React.ComponentType<any>;
-  /** Right side: 'chevron' | 'switch' | 'switch:value' */
-  right?: 'chevron' | 'switch';
+  /** Right side: 'chevron' | 'switch' | 'chips' */
+  right?: 'chevron' | 'switch' | 'chips';
   switchValue?: boolean;
+  chips?: Array<{ label: string; value: number; active: boolean }>;
+  chipsLabel?: string;
   onPress?: () => void;
   danger?: boolean;
 }
@@ -57,6 +59,7 @@ export default function SettingsScreen() {
   const notifyDue = settings?.notify_due_soon === 1;
   const notifyGoal = settings?.notify_goal_milestone === 1;
   const notifyBudget = settings?.notify_budget_exceeded === 1;
+  const alertDays = settings?.alert_days_before ?? 3;
   const displayName = settings?.display_name ?? 'Convidado';
   const email = settings?.email ?? '';
 
@@ -112,15 +115,33 @@ export default function SettingsScreen() {
     },
   ];
 
+  const alertDaysOptions = [3, 7, 12, 15, 30];
+
   const sectionNotif: SettingsEntry[] = [
     {
       key: 'n-due',
       label: 'Contas a vencer',
-      sub: 'Avisar quando faltar 3 dias para o vencimento',
+      sub: `Avisar quando faltar ate ${alertDays} ${alertDays === 1 ? 'dia' : 'dias'} para o vencimento`,
       Icon: Bell,
       right: 'switch',
       switchValue: notifyDue,
       onPress: () => { void update({ notify_due_soon: notifyDue ? 0 : 1 }); },
+    },
+    {
+      key: 'n-due-days',
+      label: 'Periodo de alerta',
+      sub: notifyDue
+        ? 'Quantos dias antes do vencimento a conta aparece em Notificacoes'
+        : 'Ative "Contas a vencer" para usar',
+      Icon: Bell,
+      right: 'chips',
+      chips: alertDaysOptions.map((d) => ({
+        label: `${d}d`,
+        value: d,
+        active: alertDays === d,
+      })),
+      chipsLabel: 'dias',
+      onPress: () => {}, // chips individuais tem seus proprios handlers
     },
     {
       key: 'n-goal',
@@ -199,10 +220,12 @@ export default function SettingsScreen() {
       {entries.map((entry, idx) => {
         const isLast = idx === entries.length - 1;
         const { Icon } = entry;
+        const isChips = entry.right === 'chips';
         return (
           <Pressable
             key={entry.key}
             onPress={entry.right === 'switch' ? entry.onPress : (entry.onPress ?? (() => {}))}
+            disabled={isChips}
             style={({ pressed }) => [
               s.row,
               !isLast && s.rowBorder,
@@ -219,6 +242,24 @@ export default function SettingsScreen() {
             <View style={{ flex: 1 }}>
               <Text style={s.label}>{entry.label}</Text>
               <Text style={s.sub}>{entry.sub}</Text>
+              {isChips && entry.chips ? (
+                <View style={chipS.row}>
+                  {entry.chips.map((c) => (
+                    <Pressable
+                      key={c.value}
+                      onPress={() => { void update({ alert_days_before: c.value }); }}
+                      style={[chipS.chip, c.active && chipS.chipActive]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: c.active }}
+                      accessibilityLabel={`Alertar ${c.label} antes`}
+                    >
+                      <Text style={[chipS.chipText, c.active && chipS.chipTextActive]}>
+                        {c.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : null}
             </View>
             {entry.right === 'switch' ? (
               <Switch
@@ -228,9 +269,9 @@ export default function SettingsScreen() {
                 thumbColor={entry.switchValue ? colors.textOnNeon : colors.muted}
                 accessibilityLabel={`Toggle ${entry.label}`}
               />
-            ) : (
+            ) : !isChips ? (
               <ChevronRight size={18} color={colors.muted} />
-            )}
+            ) : null}
           </Pressable>
         );
       })}
@@ -329,6 +370,35 @@ const s = StyleSheet.create({
   versionSub: {
     color: colors.muted, fontSize: typography.size.xs, textAlign: 'center',
     marginTop: 4, opacity: 0.7,
+  },
+});
+
+const chipS = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  chip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceHigh,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  chipActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  chipText: {
+    color: colors.textMuted,
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.bold,
+  },
+  chipTextActive: {
+    color: colors.textOnNeon,
   },
 });
 

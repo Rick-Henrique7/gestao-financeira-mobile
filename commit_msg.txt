@@ -1,32 +1,44 @@
-revert: remove ShapeGrid e restaura backgrounds opacos
+feat(notifications): trocar trofeu por engrenagem+sino e adicionar NotificationsModal
 
-Reverte as mudancas de background dos commits 0258d55, 2d4e463 e 36d71b4.
-ShapeGrid nao funcionou bem:
-- Skia: incompatibilidade com React 19 / RN 0.83 (varias versoes tentadas)
-- Versao Reanimated: vinhette chapada cobriu o canvas, deixando a Home
-  em fundo branco com ShapeGrid invisivel (feedback do usuario)
+Mudancas no header do Hero (Home):
+- Trofeu -> SINO (abre NotificationsModal)
+- Sino -> ENGRENAGEM (navega para /settings)
 
-MUDANCAS (reversao)
-- app/_layout.tsx: removido import ShapeGrid, contentStyle volta para
-  theme.colors.base (opaco)
-- app/(tabs)/_layout.tsx: tab bar volta para backgroundColor colors.bgCanvas
-  opaco (sem rgba)
-- 10 telas com root.backgroundColor revertido de 'transparent' para
-  colors.base/bgCanvas:
-  * app/(tabs)/index.tsx, contas.tsx, orcamento.tsx, assinaturas.tsx,
-    irpf.tsx
-  * app/export.tsx, loans.tsx, goals.tsx, simulacoes.tsx, settings.tsx
+NOVO COMPONENTE (src/components/NotificationsModal.tsx)
+- Lista contas a pagar vencendo dentro do periodo configurado
+  (settings.alert_days_before, default 3 dias)
+- Mostra contas ATRASADAS (vermelho), que VENCEM HOJE (amarelo),
+  e PROXIMAS (verde-limao)
+- Cada item: icone + titulo + categoria + data + dias restantes + valor
+- Respeita settings.notify_due_soon: se desativado, mostra mensagem
+  "Alertas desativados"
+- Se nenhuma conta no alerta: empty state com check verde
 
-MANTIDO
-- src/components/ShapeGrid.tsx (arquivo existe, mas nao e importado
-  em lugar nenhum - fica como codigo morto caso queira reativar
-  com ajustes futuros)
-- Design Figma (commit 7ed6e38) - hero verde-limao, paleta, tipografia
-- Onboarding (commit 1cbd562)
-- Theme.ts refactor (darkColors/lightColors com palette Figma)
+NOVO SETTING: alert_days_before (migration 006)
+- Migration 006 adiciona coluna alert_days_before INTEGER DEFAULT 3
+- UserSettings.alert_days_before: number
+- settings.ts atualiza getSettings (fallback) e updateSettings (coluna
+  incluida no UPDATE)
+
+SETTINGS: novo controle "Periodo de alerta"
+- 5 chips: 3d / 7d / 12d / 15d / 30d
+- Click no chip salva alert_days_before
+- Sub do toggle "Contas a vencer" agora reflete o valor atual
+  (ex: "Avisar quando faltar ate 7 dias para o vencimento")
+- Sub do "Periodo de alerta" avisa se o toggle esta desativado
+
+MANUTENCAO
+- Adicionado tipo 'chips' no SettingsEntry (right: 'chips' | chips[])
+- Pressable da row desabilitado quando right === 'chips' (so os
+  chips individuais sao interativos)
+- Nova StyleSheet chipS (chip, chipActive, chipText, chipTextActive)
 
 VERIFICACOES
 - tsc --noEmit: 0 erros
-- App volta a funcionar como antes do experimento ShapeGrid
+- Versao 0.6.3 -> 0.7.0
 
-Versao 0.6.2 -> 0.6.3
+FLUXO DO USUARIO
+1. Tap no sino (header) -> abre NotificationsModal
+2. Tap na engrenagem (header) -> vai pra /settings
+3. Em Settings > Notificacoes > "Periodo de alerta" escolhe 12d (etc)
+4. Volta pra Home, abre o sino -> ve contas vencendo em ate 12 dias

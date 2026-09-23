@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { View } from 'react-native';
 import { DrawerMenu } from '../src/components/DrawerMenu';
+import { BackButton } from '../src/components/BackButton';
 import { OnboardingModal } from '../src/components/OnboardingModal';
 import { useBillsStore } from '../src/stores/billsStore';
 import { useLoansStore } from '../src/stores/loansStore';
@@ -35,7 +36,7 @@ function ThemedNavigator() {
       <Stack.Screen name="loans"      options={{ title: 'Empréstimos',       headerLeft: () => <DrawerMenu /> }} />
       <Stack.Screen name="goals"      options={{ title: 'Metas & Cofrinhos', headerLeft: () => <DrawerMenu /> }} />
       <Stack.Screen name="simulacoes" options={{ title: 'Simulações',        headerLeft: () => <DrawerMenu /> }} />
-      <Stack.Screen name="settings"   options={{ title: 'Configurações',     headerLeft: () => <DrawerMenu /> }} />
+      <Stack.Screen name="settings"   options={{ title: 'Configurações',     headerLeft: () => <BackButton /> }} />
       <Stack.Screen name="export"     options={{ title: 'Exportar dados',    headerLeft: () => <DrawerMenu /> }} />
     </Stack>
   );

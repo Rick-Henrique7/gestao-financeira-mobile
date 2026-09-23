@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-  User, Bell, Shield, Download, Info, ChevronRight,
+  User, Bell, Shield, Download, Info, ChevronRight, RotateCcw,
 } from 'lucide-react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import { colors, radius, spacing, typography } from '../src/lib/theme';
@@ -150,6 +150,38 @@ export default function SettingsScreen() {
       Icon: Download,
       right: 'chevron',
       onPress: exportBackup,
+    },
+    {
+      key: 'onboarding-reset',
+      label: 'Reativar onboarding',
+      sub: 'Limpar nome salvo e mostrar a tela de boas-vindas novamente',
+      Icon: RotateCcw,
+      right: 'chevron',
+      onPress: () => {
+        Alert.alert(
+          'Reativar onboarding?',
+          'Seu nome sera limpo e a tela de boas-vindas aparecera no proximo acesso.',
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+              text: 'Reativar',
+              style: 'destructive',
+              onPress: async () => {
+                try {
+                  await update({ display_name: 'Convidado' });
+                  Alert.alert(
+                    'Pronto!',
+                    'Feche e abra o app para ver a tela de boas-vindas novamente.',
+                  );
+                } catch (e) {
+                  Alert.alert('Erro', String(e));
+                }
+              },
+            },
+          ],
+          { cancelable: true },
+        );
+      },
     },
     {
       key: 'sobre',

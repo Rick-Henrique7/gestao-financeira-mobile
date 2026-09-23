@@ -16,7 +16,7 @@ export function FAB({ onPress, style, accessibilityLabel = 'Adicionar' }: FABPro
     fab: {
       position: 'absolute' as const,
       right: 20,
-      bottom: 84,
+      bottom: 100,
       width: 56,
       height: 56,
       borderRadius: 28,

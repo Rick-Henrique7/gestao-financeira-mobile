@@ -153,9 +153,64 @@ export const lightColors = {
   tabInactive: '#9A9A9A',
 } as const;
 
+/**
+ * White theme — paleta branca + roxo real.
+ *
+ * Regra (do user):
+ *   - Onde era verde no dark/light, agora e roxo (#6D28D9)
+ *   - Onde era preto (textOnNeon / fundo do hero), agora e branco
+ *
+ * Hero:
+ *   - bg do hero: roxo (#6D28D9) — substitui o verde-limao
+ *   - texto/icones dentro do hero: branco (inverte o contraste do dark)
+ *
+ * Canvas:
+ *   - fundo: branco (#FFFFFF)
+ *   - texto principal: preto (contraste no canvas claro)
+ *   - cards: cinza muito claro (#F4F4F4) pra hierarquia
+ *
+ * Tab ativa: roxo
+ */
+export const whiteColors = {
+  bgCanvas: '#FFFFFF',
+  base: '#FFFFFF',
+
+  hero:        '#6D28D9',  // roxo real (substitui verde-limao)
+  heroText:    '#FFFFFF',  // branco dentro do hero (inverte o preto do dark)
+  heroMuted:   '#F4EBFF',  // pill clara sobre o hero (lilás bem suave)
+
+  // aliases (back-compat com codigo legado)
+  accent:       '#6D28D9',
+  accentBright: '#6D28D9',
+  accentSoft:   '#A78BFA',  // lilás mais claro para destaques secundarios
+
+  surface:      '#F4F4F4',
+  surfaceHigh:  '#EAE7F4',  // leve tom lilás no hover/inputs (liga com accent)
+  surfaceDark1: '#6D28D9',
+  surfaceDark2: '#5B21B6',
+
+  text:         '#0A0A0A',
+  textStrong:   '#0A0A0A',
+  textMuted:    '#6B7280',
+  textOnNeon:   '#FFFFFF',  // texto dentro do hero = branco
+  muted:        '#6B7280',
+
+  border:       'rgba(109, 40, 217, 0.14)',  // bordas com matiz roxa
+  borderStrong: 'rgba(109, 40, 217, 0.28)',
+
+  success: '#1E9E5F',
+  pos:     '#1E9E5F',
+  warn:    '#B86E00',
+  danger:  '#D63A3A',
+  neg:     '#D63A3A',
+
+  tabActive:   '#6D28D9',
+  tabInactive: '#9A9A9A',
+} as const;
+
 // ─── TEMAS COMPLETOS ────────────────────────────────────────────────────────
-export type ColorScheme = 'light' | 'dark';
-export type ThemeColors = typeof darkColors | typeof lightColors;
+export type ColorScheme = 'light' | 'dark' | 'white';
+export type ThemeColors = typeof darkColors | typeof lightColors | typeof whiteColors;
 export type Theme = {
   colors: ThemeColors;
   spacing: typeof spacing;
@@ -178,6 +233,14 @@ export const lightTheme: Theme = {
   radius,
   typography,
   scheme: 'light',
+};
+
+export const whiteTheme: Theme = {
+  colors: whiteColors,
+  spacing,
+  radius,
+  typography,
+  scheme: 'white',
 };
 
 // ─── BACK-COMPAT ────────────────────────────────────────────────────────────

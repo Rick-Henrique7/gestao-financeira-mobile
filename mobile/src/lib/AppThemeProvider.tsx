@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, useColorScheme } from 'react-native';
 import {
   Theme,
@@ -6,11 +6,13 @@ import {
   ColorScheme,
   darkTheme,
   lightTheme,
+  whiteTheme,
   darkColors,
   spacing,
   radius,
   typography,
 } from './theme';
+import { useSettingsStore } from '../stores/settingsStore';
 
 interface ThemeContextValue {
   theme: Theme;
@@ -19,17 +21,41 @@ interface ThemeContextValue {
   radius: typeof radius;
   typography: typeof typography;
   scheme: ColorScheme;
-  override: ColorScheme | null;
-  setOverride: (s: ColorScheme | null) => void;
+  setScheme: (s: ColorScheme | null) => Promise<void>;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+const THEMES: Record<ColorScheme, Theme> = {
+  dark: darkTheme,
+  light: lightTheme,
+  white: whiteTheme,
+};
+
 export function AppThemeProvider({ children }: { children: React.ReactNode }) {
   const system = useColorScheme();
-  const [override, setOverride] = useState<ColorScheme | null>(null);
-  const scheme: ColorScheme = override ?? (system === 'light' ? 'light' : 'dark');
-  const theme = scheme === 'light' ? lightTheme : darkTheme;
+  const settings = useSettingsStore((s) => s.settings);
+  const refreshSettings = useSettingsStore((s) => s.refresh);
+  // Snapshot local do override (para aplicar imediatamente antes do DB terminar)
+  const [localOverride, setLocalOverride] = useState<ColorScheme | null>(null);
+
+  // Carrega settings no mount (caso ainda nao tenha sido carregado)
+  useEffect(() => {
+    if (!settings) void refreshSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Override persistido tem prioridade; senao segue o sistema
+  const persistedOverride = (settings?.theme_override ?? null) as ColorScheme | null;
+  const active = localOverride ?? persistedOverride;
+  const scheme: ColorScheme = active ?? (system === 'light' ? 'light' : 'dark');
+  const theme = THEMES[scheme];
+
+  const setScheme = async (s: ColorScheme | null) => {
+    setLocalOverride(s); // aplica imediato
+    await useSettingsStore.getState().update({ theme_override: s });
+  };
+
   const value = useMemo<ThemeContextValue>(
     () => ({
       theme,
@@ -38,10 +64,10 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
       radius: theme.radius,
       typography: theme.typography,
       scheme,
-      override,
-      setOverride,
+      setScheme,
     }),
-    [theme, scheme, override],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [theme, scheme],
   );
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
@@ -64,8 +90,7 @@ export function useTheme(): ThemeContextValue {
       radius,
       typography,
       scheme: 'dark',
-      override: null,
-      setOverride: () => {},
+      setScheme: async () => {},
     };
   }
   return ctx;

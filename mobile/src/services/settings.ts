@@ -14,6 +14,7 @@ const DEFAULT_SETTINGS: NewUserSettings = {
   notify_goal_milestone: 1,
   notify_budget_exceeded: 1,
   alert_days_before: 3,
+  theme_override: null,
 };
 
 export async function getSettings(): Promise<UserSettings> {
@@ -26,9 +27,12 @@ export async function getSettings(): Promise<UserSettings> {
     );
     row = (await db.getFirstAsync<UserSettings>('SELECT * FROM user_settings WHERE id = 1'))!;
   }
-  // Garante alert_days_before (coluna nova em migration 006 pode nao vir em row antiga)
+  // Fallbacks para colunas adicionadas em migrations recentes
   if (row && typeof (row as UserSettings).alert_days_before !== 'number') {
     (row as UserSettings).alert_days_before = 3;
+  }
+  if (row && (row as UserSettings).theme_override === undefined) {
+    (row as UserSettings).theme_override = null;
   }
   return row;
 }
@@ -49,6 +53,7 @@ export async function updateSettings(patch: Partial<NewUserSettings>): Promise<U
        notify_goal_milestone = ?,
        notify_budget_exceeded = ?,
        alert_days_before = ?,
+       theme_override = ?,
        updated_at = datetime('now')
      WHERE id = 1`,
     next.display_name,
@@ -60,7 +65,8 @@ export async function updateSettings(patch: Partial<NewUserSettings>): Promise<U
     next.notify_due_soon ?? 1,
     next.notify_goal_milestone ?? 1,
     next.notify_budget_exceeded ?? 1,
-    next.alert_days_before ?? 3
+    next.alert_days_before ?? 3,
+    next.theme_override ?? null
   );
   return getSettings();
 }

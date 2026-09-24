@@ -1,44 +1,46 @@
-feat(notifications): trocar trofeu por engrenagem+sino e adicionar NotificationsModal
+feat(theme): adicionar tema 'white' (branco + roxo) selecionavel nas configs
 
-Mudancas no header do Hero (Home):
-- Trofeu -> SINO (abre NotificationsModal)
-- Sino -> ENGRENAGEM (navega para /settings)
+NOVO TEMA: white (branco + roxo real #6D28D9)
+- bgCanvas/base: #FFFFFF (branco)
+- hero/accent: #6D28D9 (roxo real - substitui o verde-limao do dark)
+- heroText/textOnNeon: #FFFFFF (branco - inverte o preto do dark)
+- text: #0A0A0A (preto, contraste no canvas branco)
+- surface: #F4F4F4 (cards cinza muito claro)
+- surfaceHigh: #EAE7F4 (leve tom lilás no hover/inputs)
+- tabActive: #6D28D9 (roxo), tabInactive: #9A9A9A (cinza)
+- borders com matiz roxa (rgba 109,40,217 + alpha)
 
-NOVO COMPONENTE (src/components/NotificationsModal.tsx)
-- Lista contas a pagar vencendo dentro do periodo configurado
-  (settings.alert_days_before, default 3 dias)
-- Mostra contas ATRASADAS (vermelho), que VENCEM HOJE (amarelo),
-  e PROXIMAS (verde-limao)
-- Cada item: icone + titulo + categoria + data + dias restantes + valor
-- Respeita settings.notify_due_soon: se desativado, mostra mensagem
-  "Alertas desativados"
-- Se nenhuma conta no alerta: empty state com check verde
+MIGRATION 007 (theme_override)
+- Nova coluna user_settings.theme_override TEXT (dark|light|white|null)
+- null = seguir o sistema do dispositivo
 
-NOVO SETTING: alert_days_before (migration 006)
-- Migration 006 adiciona coluna alert_days_before INTEGER DEFAULT 3
-- UserSettings.alert_days_before: number
-- settings.ts atualiza getSettings (fallback) e updateSettings (coluna
-  incluida no UPDATE)
+APPTHEMEPROVIDER
+- Agora suporta 3 temas via THEMES[scheme]
+- Le settings.theme_override do store e aplica antes de cair no system color scheme
+- Local override snapshotted para aplicacao imediata (sem flash)
+- API: useTheme() retorna { scheme, setScheme } (substitui override/setOverride)
 
-SETTINGS: novo controle "Periodo de alerta"
-- 5 chips: 3d / 7d / 12d / 15d / 30d
-- Click no chip salva alert_days_before
-- Sub do toggle "Contas a vencer" agora reflete o valor atual
-  (ex: "Avisar quando faltar ate 7 dias para o vencimento")
-- Sub do "Periodo de alerta" avisa se o toggle esta desativado
+SETTINGS > DADOS > TEMA
+- Nova entrada com 3 chips: Escuro / Claro / Branco
+- Label "Branco" corresponde ao novo tema "white"
+- Sub mostra o nome legivel do tema atual
 
 MANUTENCAO
-- Adicionado tipo 'chips' no SettingsEntry (right: 'chips' | chips[])
-- Pressable da row desabilitado quando right === 'chips' (so os
-  chips individuais sao interativos)
-- Nova StyleSheet chipS (chip, chipActive, chipText, chipTextActive)
-
-VERIFICACOES
+- SettingsEntry.chips[].value agora aceita number | string (theme e' string)
+- TypeScript-safe: type guards usados nos handlers
 - tsc --noEmit: 0 erros
-- Versao 0.6.3 -> 0.7.0
+- Versao 0.7.1 -> 0.8.0
 
-FLUXO DO USUARIO
-1. Tap no sino (header) -> abre NotificationsModal
-2. Tap na engrenagem (header) -> vai pra /settings
-3. Em Settings > Notificacoes > "Periodo de alerta" escolhe 12d (etc)
-4. Volta pra Home, abre o sino -> ve contas vencendo em ate 12 dias
+COMO TESTAR
+1. Recarregar o app
+2. Abrir Configuracoes (drawer ou engrenagem do hero)
+3. Em Dados > "Tema do app" toca em "Branco"
+4. Voltar pra Home: hero fica roxo, fundo branco, texto preto no canvas
+5. Recarregar app: tema persiste (vem do SQLite)
+
+NOTA SOBRE PERSISTENCIA
+- A escolha e salva no SQLite (migration 007)
+- Ao reabrir o app, o AppThemeProvider le settings.theme_override antes
+  de renderizar (sem flash de tema errado)
+- "Seguir sistema" nao e' uma opcao clicavel; basta nunca escolher tema
+  (campo theme_override fica NULL e segue useColorScheme() do sistema)

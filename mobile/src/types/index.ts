@@ -183,6 +183,7 @@ export interface UserSettings {
   notify_goal_milestone: 0 | 1;
   notify_budget_exceeded: 0 | 1;
   alert_days_before: number;
+  theme_override: 'dark' | 'light' | 'white' | null;
   created_at: string;
   updated_at: string;
 }

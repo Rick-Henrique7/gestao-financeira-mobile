@@ -5,6 +5,7 @@ import { migration003 } from './migrations/003_goal_deposits';
 import { migration004 } from './migrations/004_goals_enhance';
 import { migration005 } from './migrations/005_notification_prefs';
 import { migration006 } from './migrations/006_alert_lead_time';
+import { migration007 } from './migrations/007_theme_override';
 
 // ─── DB SINGLETON (SQLite local, offline-first) ─────────────────────────────
 const DB_NAME = 'sgf.db';
@@ -90,6 +91,7 @@ const migrations: Migration[] = [
   { name: '004_goals_enhance',  sql: migration004 },
   { name: '005_notification_prefs', sql: migration005 },
   { name: '006_alert_lead_time', sql: migration006 },
+  { name: '007_theme_override', sql: migration007 },
 ];
 
 async function runMigrations(db: SQLite.SQLiteDatabase) {

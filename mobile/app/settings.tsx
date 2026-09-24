@@ -4,10 +4,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-  User, Bell, Shield, Download, Info, ChevronRight, RotateCcw,
+  User, Bell, Shield, Download, Info, ChevronRight, RotateCcw, Palette,
 } from 'lucide-react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import { colors, radius, spacing, typography } from '../src/lib/theme';
+import { useTheme } from '../src/lib/AppThemeProvider';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { useBillsStore } from '../src/stores/billsStore';
 import { useSubsStore } from '../src/stores/subscriptionsStore';
@@ -26,7 +27,7 @@ interface SettingsEntry {
   /** Right side: 'chevron' | 'switch' | 'chips' */
   right?: 'chevron' | 'switch' | 'chips';
   switchValue?: boolean;
-  chips?: Array<{ label: string; value: number; active: boolean }>;
+  chips?: Array<{ label: string; value: number | string; active: boolean }>;
   chipsLabel?: string;
   onPress?: () => void;
   danger?: boolean;
@@ -34,6 +35,7 @@ interface SettingsEntry {
 
 export default function SettingsScreen() {
   const { settings, refresh, update, toggleHideValues } = useSettingsStore();
+  const { scheme, setScheme } = useTheme();
   const { bills } = useBillsStore();
   const { subs } = useSubsStore();
   const { goals } = useGoalsStore();
@@ -165,6 +167,26 @@ export default function SettingsScreen() {
 
   const sectionDados: SettingsEntry[] = [
     {
+      key: 'theme',
+      label: 'Tema do app',
+      sub:
+        scheme === 'white'
+          ? 'Branco + roxo'
+          : scheme === 'light'
+            ? 'Claro (off-white + verde)'
+            : 'Escuro (preto + verde-limao)',
+      Icon: Palette,
+      right: 'chips',
+      chips: [
+        { label: 'Escuro',  value: 'dark',  active: scheme === 'dark' },
+        { label: 'Claro',   value: 'light', active: scheme === 'light' },
+        { label: 'Branco',  value: 'white', active: scheme === 'white' },
+      ],
+      chipsLabel: 'tema',
+      // onPress do row fica vazio; chips individuais tem handler
+      onPress: () => {},
+    },
+    {
       key: 'backup',
       label: 'Backup completo',
       sub: 'Exportar todos os dados em JSON (compartilhar/salvar)',
@@ -246,8 +268,15 @@ export default function SettingsScreen() {
                 <View style={chipS.row}>
                   {entry.chips.map((c) => (
                     <Pressable
-                      key={c.value}
-                      onPress={() => { void update({ alert_days_before: c.value }); }}
+                      key={String(c.value)}
+                      onPress={() => {
+                        // handler varia por entry.key
+                        if (entry.key === 'theme') {
+                          void setScheme(c.value as 'dark' | 'light' | 'white');
+                        } else {
+                          void update({ alert_days_before: Number(c.value) });
+                        }
+                      }}
                       style={[chipS.chip, c.active && chipS.chipActive]}
                       accessibilityRole="button"
                       accessibilityState={{ selected: c.active }}
